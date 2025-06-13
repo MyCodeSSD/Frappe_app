@@ -1,0 +1,386 @@
+{
+ "actions": [],
+ "autoname": "cost-.####",
+ "creation": "2025-06-09 09:33:25.556621",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "inv_no",
+  "inv_date",
+  "customer",
+  "column_break_htkm",
+  "notify",
+  "category",
+  "accounting_company",
+  "column_break_trkv",
+  "shipping_company",
+  "multiple_po",
+  "po_no",
+  "multiple_supplier",
+  "supplier",
+  "custom_title",
+  "section_break_cwog",
+  "product_details",
+  "section_break_pyqu",
+  "column_break_umma",
+  "column_break_pqdr",
+  "column_break_gifz",
+  "purchase",
+  "expensess_section",
+  "expenses",
+  "expenses_section",
+  "agent",
+  "comm_note",
+  "column_break_losw",
+  "comm_based_on",
+  "column_break_epxo",
+  "comm_rate",
+  "column_break_efjq",
+  "commission",
+  "section_break_knmp",
+  "column_break_vvlx",
+  "column_break_yezx",
+  "column_break_xmml",
+  "cost",
+  "section_break_uamc",
+  "column_break_hncw",
+  "column_break_byfu",
+  "column_break_ijpc",
+  "sales",
+  "section_break_vpby",
+  "column_break_wtog",
+  "column_break_spqd",
+  "profit_pct",
+  "column_break_ummu",
+  "profit",
+  "tab_break_isie",
+  "section_break_nmkz",
+  "load_port",
+  "column_break_xqet",
+  "destination_port",
+  "final_destination"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_htkm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "notify",
+   "fieldtype": "Link",
+   "label": "Notify",
+   "options": "Notify",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Product Category",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounting_company",
+   "fieldtype": "Link",
+   "label": "Accounting Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_trkv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_company",
+   "fieldtype": "Link",
+   "label": "Shipping Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "multiple_po",
+   "fieldtype": "Check",
+   "label": "Multiple PO"
+  },
+  {
+   "fieldname": "po_no",
+   "fieldtype": "Data",
+   "label": "PO No"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "section_break_cwog",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "product_details",
+   "fieldtype": "Table",
+   "label": "Product Details",
+   "options": "Product Cost",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_pyqu",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_umma",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_pqdr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_gifz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase",
+   "fieldtype": "Float",
+   "label": "Purchase",
+   "precision": "2"
+  },
+  {
+   "fieldname": "section_break_nmkz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "load_port",
+   "fieldtype": "Link",
+   "label": "Load Port",
+   "options": "Port"
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Link",
+   "label": "Destination Port",
+   "options": "Port"
+  },
+  {
+   "fieldname": "final_destination",
+   "fieldtype": "Link",
+   "label": "Final Destination",
+   "options": "City"
+  },
+  {
+   "fieldname": "column_break_xqet",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "inv_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Inv No",
+   "options": "CIF Sheet",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "inv_date",
+   "fieldtype": "Data",
+   "label": "Inv Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "custom_title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Custom Title"
+  },
+  {
+   "fieldname": "tab_break_isie",
+   "fieldtype": "Tab Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "expenses_section",
+   "fieldtype": "Section Break",
+   "label": "Commission"
+  },
+  {
+   "fieldname": "expenses",
+   "fieldtype": "Table",
+   "label": "Expenses",
+   "options": "Expenses Cost"
+  },
+  {
+   "fieldname": "comm_note",
+   "fieldtype": "Data",
+   "label": "Comm Note"
+  },
+  {
+   "fieldname": "column_break_losw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_epxo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_efjq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_knmp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vvlx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_yezx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xmml",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_uamc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_hncw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_byfu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ijpc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_vpby",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_wtog",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_spqd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_ummu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "agent",
+   "fieldtype": "Data",
+   "label": "Agent"
+  },
+  {
+   "default": "Quantity",
+   "fieldname": "comm_based_on",
+   "fieldtype": "Select",
+   "label": "Based On",
+   "options": "Sales\nQuantity"
+  },
+  {
+   "fieldname": "comm_rate",
+   "fieldtype": "Float",
+   "label": "Comm Rate"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "commission",
+   "fieldtype": "Float",
+   "label": "Commission",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "cost",
+   "fieldtype": "Float",
+   "label": "Cost",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "sales",
+   "fieldtype": "Float",
+   "label": "Sales",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "profit_pct",
+   "fieldtype": "Percent",
+   "label": "Profit Pct",
+   "precision": "2"
+  },
+  {
+   "default": "0.00",
+   "fieldname": "profit",
+   "fieldtype": "Float",
+   "label": "Profit",
+   "precision": "2"
+  },
+  {
+   "fieldname": "expensess_section",
+   "fieldtype": "Section Break",
+   "label": "Expenses"
+  },
+  {
+   "default": "0",
+   "fieldname": "multiple_supplier",
+   "fieldtype": "Check",
+   "label": "Multiple Supplier"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-06-12 11:54:38.502118",
+ "modified_by": "Administrator",
+ "module": "My Custom",
+ "name": "Cost Sheet",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "custom_title"
+}

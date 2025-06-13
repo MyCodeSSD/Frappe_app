@@ -1,0 +1,144 @@
+{
+ "actions": [],
+ "autoname": "cidp-.####",
+ "creation": "2025-06-03 17:42:49.884122",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "product",
+  "unit",
+  "sc_no",
+  "qty",
+  "rate",
+  "column_break_lvbk",
+  "charges",
+  "charges_amount",
+  "gross",
+  "currency",
+  "column_break_qlxw",
+  "ex_rate",
+  "round_off_usd",
+  "gross_usd",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "product",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Product",
+   "options": "Product",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sc_no",
+   "fieldtype": "Data",
+   "label": "SC No"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rate",
+   "non_negative": 1,
+   "precision": "4",
+   "reqd": 1
+  },
+  {
+   "default": " ",
+   "fieldname": "charges",
+   "fieldtype": "Data",
+   "label": "Charges"
+  },
+  {
+   "fieldname": "charges_amount",
+   "fieldtype": "Float",
+   "label": "Charges Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "gross",
+   "fieldtype": "Float",
+   "label": "Gross",
+   "precision": "4",
+   "read_only": 1
+  },
+  {
+   "default": "USD",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "ex_rate",
+   "fieldtype": "Float",
+   "label": "Ex Rate",
+   "non_negative": 1,
+   "precision": "4",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "gross_usd",
+   "fieldtype": "Float",
+   "label": "Gross (USD)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Data",
+   "label": "Note"
+  },
+  {
+   "fieldname": "column_break_lvbk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_qlxw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_off_usd",
+   "fieldtype": "Float",
+   "label": "Round Off (USD)",
+   "precision": "2"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-06-12 10:31:13.835548",
+ "modified_by": "Administrator",
+ "module": "My Custom",
+ "name": "Product CIF",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,80 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-09 09:18:30.252535",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "expenses",
+  "amount",
+  "currency",
+  "column_break_wqwt",
+  "ex_rate",
+  "amount_usd",
+  "note"
+ ],
+ "fields": [
+  {
+   "default": "Freight",
+   "fieldname": "expenses",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Expenses",
+   "options": "Freight\nLocal Exp\nInland Charges\nSwitch B/L Charges\nInsurance\nOthers",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "default": "USD",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_wqwt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "ex_rate",
+   "fieldtype": "Float",
+   "label": "Ex Rate",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "amount_usd",
+   "fieldtype": "Float",
+   "label": "Amount (USD)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Data",
+   "label": "Note"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-06-12 11:43:02.009884",
+ "modified_by": "Administrator",
+ "module": "My Custom",
+ "name": "Expenses Cost",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

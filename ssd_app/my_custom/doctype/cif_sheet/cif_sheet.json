@@ -1,0 +1,415 @@
+{
+ "actions": [],
+ "autoname": "cif-.####",
+ "creation": "2025-06-03 17:38:34.042582",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_lj47",
+  "inv_no",
+  "inv_date",
+  "customer",
+  "column_break_uzqc",
+  "notify",
+  "category",
+  "accounting_company",
+  "column_break_lbuh",
+  "shipping_company",
+  "multiple_sc",
+  "sc_no",
+  "amended_from",
+  "section_break_tzfx",
+  "product_details",
+  "section_break_mbkc",
+  "column_break_rdlp",
+  "column_break_yzyy",
+  "column_break_zoiz",
+  "gross_sales",
+  "section_break_lyhe",
+  "expenses",
+  "section_break_pndb",
+  "insurance_pct",
+  "column_break_irgn",
+  "insurance_based_on",
+  "column_break_xlnx",
+  "insurance",
+  "section_break_hzbr",
+  "handling_pct",
+  "column_break_ixkc",
+  "handling_based_on",
+  "column_break_lurq",
+  "handling_charges",
+  "section_break_hwoc",
+  "column_break_kajd",
+  "column_break_uels",
+  "column_break_zcyq",
+  "sales",
+  "document",
+  "cc",
+  "section_break_qsyk",
+  "payment_term",
+  "term_days",
+  "column_break_ghco",
+  "from_date",
+  "due_date",
+  "column_break_ypve",
+  "bank",
+  "bank_ref_no",
+  "section_break_kazq",
+  "load_port",
+  "column_break_ssyf",
+  "destination_port",
+  "column_break_hjaw",
+  "final_destination"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_lj47",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "inv_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Inv No",
+   "no_copy": 1,
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "inv_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Inv Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_uzqc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "notify",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Notify",
+   "options": "Notify",
+   "reqd": 1
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "label": "Category",
+   "options": "Product Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_lbuh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "multiple_sc",
+   "fieldtype": "Check",
+   "label": "Multiple SC"
+  },
+  {
+   "fieldname": "sc_no",
+   "fieldtype": "Data",
+   "label": "SC No"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "CIF Sheet",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "section_break_tzfx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "[{\"note\":\"\"}]",
+   "fieldname": "product_details",
+   "fieldtype": "Table",
+   "label": "Product Details",
+   "options": "Product CIF",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_mbkc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_rdlp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_yzyy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_zoiz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "gross_sales",
+   "fieldtype": "Float",
+   "label": "Gross Sales",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_lyhe",
+   "fieldtype": "Section Break",
+   "label": "Expenses"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_pndb",
+   "fieldtype": "Section Break",
+   "label": "Insurance"
+  },
+  {
+   "fieldname": "insurance_pct",
+   "fieldtype": "Float",
+   "label": "Insurance Pct"
+  },
+  {
+   "fieldname": "column_break_irgn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "On Total",
+   "fieldname": "insurance_based_on",
+   "fieldtype": "Select",
+   "label": "Based On",
+   "options": "On Total\nOn Gross"
+  },
+  {
+   "fieldname": "column_break_xlnx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance",
+   "fieldtype": "Float",
+   "label": "Insurance",
+   "precision": "2"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_hzbr",
+   "fieldtype": "Section Break",
+   "label": "Handling"
+  },
+  {
+   "fieldname": "handling_pct",
+   "fieldtype": "Float",
+   "label": "Handling Pct"
+  },
+  {
+   "fieldname": "column_break_ixkc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "On Total",
+   "fieldname": "handling_based_on",
+   "fieldtype": "Select",
+   "label": "Based On",
+   "options": "On Total\nOn Gross"
+  },
+  {
+   "fieldname": "column_break_lurq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "handling_charges",
+   "fieldtype": "Float",
+   "label": "Handling Charges",
+   "precision": "2"
+  },
+  {
+   "fieldname": "section_break_hwoc",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_kajd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_uels",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_zcyq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "sales",
+   "fieldtype": "Float",
+   "label": "Sales",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "document",
+   "fieldtype": "Float",
+   "label": "Document",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "cc",
+   "fieldtype": "Float",
+   "label": "CC",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_qsyk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "payment_term",
+   "fieldtype": "Link",
+   "label": "Payment Term",
+   "options": "Payment Term",
+   "reqd": 1
+  },
+  {
+   "fieldname": "term_days",
+   "fieldtype": "Int",
+   "label": "Term Days",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ghco",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ypve",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank"
+  },
+  {
+   "fieldname": "bank_ref_no",
+   "fieldtype": "Data",
+   "label": "Bank Ref No"
+  },
+  {
+   "fieldname": "section_break_kazq",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "load_port",
+   "fieldtype": "Link",
+   "label": "Load Port",
+   "options": "Port",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_ssyf",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "destination_port",
+   "fieldtype": "Link",
+   "label": "Destination Port",
+   "options": "Port",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_hjaw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "final_destination",
+   "fieldtype": "Link",
+   "label": "Final Destination",
+   "options": "City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounting_company",
+   "fieldtype": "Link",
+   "label": "Accounting Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "shipping_company",
+   "fieldtype": "Link",
+   "label": "Shipping Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expenses",
+   "fieldtype": "Table",
+   "label": "Expenses",
+   "options": "Expenses CIF"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-06-11 12:27:53.637655",
+ "modified_by": "Administrator",
+ "module": "My Custom",
+ "name": "CIF Sheet",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "inv_no"
+}

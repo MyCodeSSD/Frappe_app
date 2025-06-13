@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "autoname": "cife-.####",
+ "creation": "2025-06-04 09:14:38.916976",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "expenses",
+  "amount",
+  "currency",
+  "column_break_steh",
+  "ex_rate",
+  "amount_usd",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "expenses",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Expenses",
+   "options": "Freight\nLocal Exp\nInland Charges\nSwitch B/L Charges\nOthers",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Amount",
+   "non_negative": 1,
+   "precision": "4",
+   "reqd": 1
+  },
+  {
+   "default": "USD",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "ex_rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Ex Rate",
+   "precision": "4",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount_usd",
+   "fieldtype": "Float",
+   "label": "Amount (USD)",
+   "precision": "2"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Data",
+   "label": "Note"
+  },
+  {
+   "fieldname": "column_break_steh",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-06-11 11:32:47.276892",
+ "modified_by": "Administrator",
+ "module": "My Custom",
+ "name": "Expenses CIF",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

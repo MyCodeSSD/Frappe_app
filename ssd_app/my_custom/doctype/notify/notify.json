@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "autoname": "nfy-.####",
+ "creation": "2025-06-03 16:44:32.863472",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "notify",
+  "code",
+  "relationship_from",
+  "city",
+  "address",
+  "customer_group",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "notify",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Notify",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "City",
+   "options": "City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Data",
+   "label": "Customer Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Data",
+   "label": "Note"
+  },
+  {
+   "fieldname": "relationship_from",
+   "fieldtype": "Int",
+   "label": "Relationship From ",
+   "non_negative": 1,
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-06-10 14:06:55.251154",
+ "modified_by": "Administrator",
+ "module": "My Custom",
+ "name": "Notify",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "notify"
+}
