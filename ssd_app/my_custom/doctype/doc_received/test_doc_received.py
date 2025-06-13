@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestDocNego(FrappeTestCase):
+class TestDocReceived(FrappeTestCase):
 	pass

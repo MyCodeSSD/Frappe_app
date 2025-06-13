@@ -98,6 +98,8 @@ function calculate_cost(frm) {
         });
 }
 
+
+
 // Populate data from CIF Sheet
 function get_cif_data(frm) {
     if (!frm.doc.inv_no) return;
@@ -163,9 +165,23 @@ function get_cif_data(frm) {
 
             frm.refresh_fields();
             run_all_calculations(frm);
+           frappe.after_ajax(() => {
+            setTimeout(() => {
+                const fields_to_lock = ['inv_date','notify','customer','category','accounting_company','shipping_company'];
+                fields_to_lock.forEach(field => {
+                    frm.set_df_property(field, 'read_only', 1);
+                });
+
+                frm.refresh_fields(); // Refresh all at once
+            }, 150); // Optimal delay for Link title resolution
+        });
+
         }
+        
     });
+    
 }
+
 
 // Custom filter
 function inv_no_filter(frm) {

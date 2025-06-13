@@ -385,7 +385,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-11 12:27:53.637655",
+ "modified": "2025-06-13 10:27:29.170319",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "CIF Sheet",
@@ -411,5 +411,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "inv_no"
+ "title_field": "inv_no",
+ "track_changes": 1
 }

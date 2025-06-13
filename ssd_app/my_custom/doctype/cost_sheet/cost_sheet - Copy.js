@@ -1,8 +1,8 @@
 // Utility: Toggle SC No field
 function toggle_po_no_field(frm) {
     const hidden = !!frm.doc.multiple_po;
-    frm.set_df_property('po_no', 'hidden', hidden);
-    frm.set_df_property('po_no', 'reqd', !hidden);
+    frm.toggle_display('po_no', !hidden);
+    frm.toggle_reqd('po_no', !hidden);
     if (hidden) frm.set_value('po_no', '');
 
     const grid = frm.fields_dict.product_details.grid;
@@ -10,32 +10,11 @@ function toggle_po_no_field(frm) {
     grid.update_docfield_property('po_no', 'read_only', !hidden);
 }
 
-
-function put_po_no_sup_in_child_row(frm) {
-    let updated = false;
-    if (!frm.doc.multiple_sc) {
-        frm.doc.product_details.forEach(row => {
-            row.po_no = frm.doc.po_no;
-        });
-        updated = true;
-    }
-
-    if (!frm.doc.multiple_supplier) {
-        frm.doc.product_details.forEach(row => {
-            row.supplier = frm.doc.supplier;
-        });
-        updated = true;
-    }
-    if (updated) {
-        frm.refresh_field('product_details');
-    }
-}
-
 // Utility: Toggle Supplier No field
 function toggle_supplier_field(frm) {
     const hidden = !!frm.doc.multiple_supplier;
-    frm.set_df_property('supplier', 'hidden', hidden);
-    frm.set_df_property('supplier', 'reqd', !hidden);
+    frm.toggle_display('supplier', !hidden);
+    frm.toggle_reqd('supplier', !hidden);
     if (hidden) frm.set_value('supplier', '');
 
     const grid = frm.fields_dict.product_details.grid;
@@ -43,8 +22,24 @@ function toggle_supplier_field(frm) {
     grid.update_docfield_property('supplier', 'read_only', !hidden);
 }
 
+// Utility: Set PO and Supplier in child table
+function put_po_no_sup_in_child_row(frm) {
+    let updated = false;
 
-// Utility: Calculate totals
+    if (!frm.doc.multiple_po) {
+        frm.doc.product_details.forEach(row => row.po_no = frm.doc.po_no);
+        updated = true;
+    }
+
+    if (!frm.doc.multiple_supplier) {
+        frm.doc.product_details.forEach(row => row.supplier = frm.doc.supplier);
+        updated = true;
+    }
+
+    if (updated) frm.refresh_field('product_details');
+}
+
+// Calculate total purchase
 function calculate_purchase(frm) {
     const total = frm.doc.product_details.reduce((sum, row) => sum + flt(row.gross_usd), 0);
     frm.set_value('purchase', flt(total, 2));
@@ -58,51 +53,52 @@ function calculate_total_qty(frm) {
     return frm.doc.product_details.reduce((sum, row) => sum + flt(row.qty), 0);
 }
 
+// Commission calculation
 function calculate_commission(frm) {
-    const c_rate = frm.doc.comm_rate;
+    const rate = frm.doc.comm_rate;
 
-    if (c_rate) {
-        frm.set_df_property('agent', 'reqd', true);
-
+    if (rate) {
+        frm.toggle_reqd('agent', true);
         const base = frm.doc.comm_based_on === "Sales"
-            ? flt(frm.doc.sales) * c_rate / 100
-            : calculate_total_qty(frm) * c_rate;
+            ? flt(frm.doc.sales) * rate / 100
+            : calculate_total_qty(frm) * rate;
 
-        frm.set_value("commission", flt(base, 2));
+        frm.set_value('commission', flt(base, 2));
     } else {
-        frm.set_df_property('agent', 'reqd', false);
-        frm.set_value("commission", 0);
+        frm.toggle_reqd('agent', false);
+        frm.set_value('commission', 0);
     }
 }
 
+// Final cost/profit calculation
 function calculate_cost(frm) {
-    if(frm.doc.inv_no){
-        calculate_commission(frm);
+    if (!frm.doc.inv_no) return;
 
-        // const sales = flt(frm.doc.sales);
-        frappe.db.get_value("CIF Sheet", frm.doc.inv_no, "sales").then(r => {
-            if (r.message) {
-                const sales= flt(r.message.sales,2);
-                const commission = flt(frm.doc.commission);
-                const purchase = flt(frm.doc.purchase);
-                const expenses = flt(calculate_total_exp(frm));
+    frappe.db.get_value("CIF Sheet", frm.doc.inv_no, "sales")
+        .then(r => {
+            if (!r.message) return;
 
-                const total_cost = flt(purchase + expenses + commission, 2);
-                const profit = flt(sales - total_cost, 2);
-                const profit_pct = total_cost ? flt((profit / total_cost) * 100, 2) : 0;
+            const sales = flt(r.message.sales);
+            const commission = flt(frm.doc.commission);
+            const purchase = flt(frm.doc.purchase);
+            const expenses = flt(calculate_total_exp(frm));
 
-                frm.set_value("cost", total_cost);
-                frm.set_value("profit", profit);
-                frm.set_value("profit_pct", profit_pct);
-            }
+            const total_cost = flt(purchase + expenses + commission, 2);
+            const profit = flt(sales - total_cost, 2);
+            const profit_pct = total_cost ? flt((profit / total_cost) * 100, 2) : 0;
+
+            frm.set_value({
+                cost: total_cost,
+                profit,
+                profit_pct
+            });
+        })
+        .catch(() => {
+            frappe.msgprint("Failed to fetch sales value from CIF Sheet.");
         });
-
-
-    }
-    
 }
 
-// Utility: Populate data from CIF Sheet
+// Populate data from CIF Sheet
 function get_cif_data(frm) {
     if (!frm.doc.inv_no) return;
 
@@ -121,19 +117,20 @@ function get_cif_data(frm) {
                 accounting_company: data.accounting_company,
                 shipping_company: data.shipping_company,
                 multiple_po: data.multiple_sc,
+                po_no: data.sc_no,
                 sales: data.sales
             });
 
             frm.clear_table("product_details");
             (data.product_details || []).forEach(row => {
-                const child = frm.add_child("product_details", {
+                frm.add_child("product_details", {
                     product: row.product,
                     qty: row.qty,
                     unit: row.unit,
                     id_code: row.name,
+                    po_no: row.sc_no,
                     ...(data.handling_charges && {
                         rate: row.rate,
-                        po_no: row.sc_no,
                         currency: row.currency,
                         ex_rate: row.ex_rate,
                         charges: row.charges,
@@ -168,32 +165,36 @@ function get_cif_data(frm) {
             run_all_calculations(frm);
         }
     });
+    
 }
 
+// Custom filter
 function inv_no_filter(frm) {
     frm.set_query('inv_no', () => ({
         query: 'ssd_app.my_custom.doctype.cost_sheet.cost_sheet.get_available_inv_no'
     }));
 }
 
-// Calculation functions
+// Child calculations
 function calculate_gross(cdt, cdn) {
     const row = locals[cdt][cdn];
     const gross = flt(row.qty) * flt(row.rate) + flt(row.charges_amount);
-    frappe.model.set_value(cdt, cdn, "gross", flt(gross, 2));
+    frappe.model.set_value(cdt, cdn, 'gross', flt(gross, 2));
 }
 
 function calculate_gross_usd(cdt, cdn) {
     const row = locals[cdt][cdn];
     if (row.ex_rate) {
         const usd = flt(row.gross / row.ex_rate) + flt(row.round_off_usd);
-        frappe.model.set_value(cdt, cdn, "gross_usd", flt(usd, 2));
+        frappe.model.set_value(cdt, cdn, 'gross_usd', flt(usd, 2));
     }
 }
 
 function calculate_exp(cdt, cdn) {
     const row = locals[cdt][cdn];
-    frappe.model.set_value(cdt, cdn, "amount_usd", flt(row.amount / row.ex_rate, 2));
+    if (row.ex_rate) {
+        frappe.model.set_value(cdt, cdn, 'amount_usd', flt(row.amount / row.ex_rate, 2));
+    }
 }
 
 // Shared triggers
@@ -201,7 +202,6 @@ function update_all(frm, cdt, cdn) {
     calculate_gross(cdt, cdn);
     calculate_gross_usd(cdt, cdn);
     calculate_purchase(frm);
-    calculate_total_exp(frm);
     calculate_commission(frm);
     calculate_cost(frm);
 }
@@ -223,16 +223,12 @@ frappe.ui.form.on("Cost Sheet", {
     onload_post_render: run_all_calculations,
     inv_no: get_cif_data,
     validate: put_po_no_sup_in_child_row,
-    refresh(frm){
-         toggle_po_no_field(frm);
-         toggle_supplier_field(frm);
-    }, 
-    multiple_po(frm){
-        toggle_po_no_field(frm);  
-    },
-    multiple_supplier(frm){
+    refresh(frm) {
+        toggle_po_no_field(frm);
         toggle_supplier_field(frm);
     },
+    multiple_po: toggle_po_no_field,
+    multiple_supplier: toggle_supplier_field,
     comm_rate(frm) {
         calculate_commission(frm);
         calculate_cost(frm);
@@ -240,7 +236,7 @@ frappe.ui.form.on("Cost Sheet", {
     comm_based_on(frm) {
         calculate_commission(frm);
         calculate_cost(frm);
-    },
+    }
 });
 
 frappe.ui.form.on("Product Cost", {

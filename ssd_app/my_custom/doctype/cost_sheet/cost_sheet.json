@@ -65,9 +65,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "options": "Customer",
-   "read_only": 1,
-   "reqd": 1
+   "options": "Customer"
   },
   {
    "fieldname": "column_break_htkm",
@@ -77,25 +75,19 @@
    "fieldname": "notify",
    "fieldtype": "Link",
    "label": "Notify",
-   "options": "Notify",
-   "read_only": 1,
-   "reqd": 1
+   "options": "Notify"
   },
   {
    "fieldname": "category",
    "fieldtype": "Link",
    "label": "Category",
-   "options": "Product Category",
-   "read_only": 1,
-   "reqd": 1
+   "options": "Product Category"
   },
   {
    "fieldname": "accounting_company",
    "fieldtype": "Link",
    "label": "Accounting Company",
-   "options": "Company",
-   "read_only": 1,
-   "reqd": 1
+   "options": "Company"
   },
   {
    "fieldname": "column_break_trkv",
@@ -105,9 +97,7 @@
    "fieldname": "shipping_company",
    "fieldtype": "Link",
    "label": "Shipping Company",
-   "options": "Company",
-   "read_only": 1,
-   "reqd": 1
+   "options": "Company"
   },
   {
    "default": "0",
@@ -190,6 +180,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Inv No",
+   "no_copy": 1,
    "options": "CIF Sheet",
    "reqd": 1,
    "set_only_once": 1,
@@ -198,8 +189,7 @@
   {
    "fieldname": "inv_date",
    "fieldtype": "Data",
-   "label": "Inv Date",
-   "read_only": 1
+   "label": "Inv Date"
   },
   {
    "fieldname": "custom_title",
@@ -357,7 +347,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-12 11:54:38.502118",
+ "modified": "2025-06-13 15:21:51.673787",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "Cost Sheet",
