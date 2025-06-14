@@ -34,4 +34,6 @@ def update_cif_bank_if_missing(inv_no, bank_value):
 
 
 class DocReceived(Document):
-	pass
+    frappe.frappe.msgprint('Message')
+    
+	# pass
