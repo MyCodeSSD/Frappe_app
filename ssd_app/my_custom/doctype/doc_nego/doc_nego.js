@@ -99,7 +99,7 @@ function calc_due_date(frm) {
         }else{
             frappe.msgprint({
                 title: __("Invalid Term Days"),
-                message: __("Term Days must be positive number."),
+                message: __("Term Days must be positive int number."),
                 indicator: "red"
             });
         }
