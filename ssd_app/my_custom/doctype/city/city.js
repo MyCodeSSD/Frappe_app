@@ -13,6 +13,9 @@ function set_custom_title(frm){
 }
 
 frappe.ui.form.on("City", {
+    onload_post_render: function(frm) {
+        frm.set_value('country', '');
+    },
 	country(frm) {
         set_custom_title(frm);
 	},

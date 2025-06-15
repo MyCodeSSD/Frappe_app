@@ -1,3 +1,11 @@
+// 🧠 Function to apply custom query filter on inv_no field
+function inv_no_filter(frm) {
+    frm.set_query('inv_no', () => ({
+        query: 'ssd_app.my_custom.doctype.doc_received.doc_received.get_available_inv_no'
+    }));
+}
+
+// 🧠 Function to fetch CIF data based on selected inv_no
 function get_cif_data(frm) {
     if (!frm.doc.inv_no) return;
 
@@ -7,6 +15,10 @@ function get_cif_data(frm) {
         callback: function (r) {
             const data = r.message;
             if (!data) return;
+            const fields_to_lock = ['inv_date', 'category', 'bank','notify', 'customer', 'payment_term'];
+            fields_to_lock.forEach(field => {
+                    frm.set_df_property(field, 'read_only', 0);
+                });
 
             frm.set_value({
                 inv_date: data.inv_date,
@@ -17,31 +29,31 @@ function get_cif_data(frm) {
                 payment_term: data.payment_term,
                 term_days: data.term_days,
                 document: data.document,
-                received:data.document
+                received: data.receivable,
+                received_date: frappe.datetime.get_today()
             });
 
-            // Delay to ensure fields are set before locking
+            // Lock fields after delay to ensure they are set
             setTimeout(() => {
-                const fields_to_lock = ['inv_date', 'category', 'bank', 'notify', 'customer', 'payment_term'];
-
                 fields_to_lock.forEach(field => {
                     frm.set_df_property(field, 'read_only', 1);
                 });
 
-                // Conditionally unlock bank if missing
+                // Unlock and require bank if it's empty
                 if (!data.bank) {
                     frm.set_df_property('bank', 'reqd', 1);
                     frm.set_df_property('bank', 'read_only', 0);
                 }
 
                 frm.refresh_fields();
-            }, 300);
+            }, 150);
         }
     });
 }
 
+// 🧠 Function to update CIF Sheet if bank was missing
 function put_bank_in_cif(frm) {
-    if (!frm.doc.bank) return;
+    if (!frm.doc.bank || !frm.doc.inv_no) return;
 
     frappe.call({
         method: "ssd_app.my_custom.doctype.doc_received.doc_received.update_cif_bank_if_missing",
@@ -52,7 +64,17 @@ function put_bank_in_cif(frm) {
     });
 }
 
+
+
+// 🧩 Main Form Event Bindings
 frappe.ui.form.on("Doc Received", {
-    inv_no: get_cif_data,
-    before_save: put_bank_in_cif
+    setup(frm) {
+        inv_no_filter(frm);  // ✅ Register custom filter
+    },
+    inv_no(frm) {
+        get_cif_data(frm);   // ✅ Fetch CIF details
+    },
+    before_save(frm) {
+        put_bank_in_cif(frm); // ✅ Update CIF Sheet
+    }
 });

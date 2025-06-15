@@ -286,9 +286,9 @@
   },
   {
    "fieldname": "payment_term",
-   "fieldtype": "Link",
+   "fieldtype": "Select",
    "label": "Payment Term",
-   "options": "Payment Term",
+   "options": "LC\nLC at Sight\nDP\nDA\nTT",
    "reqd": 1
   },
   {
@@ -385,7 +385,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-13 10:27:29.170319",
+ "modified": "2025-06-15 21:18:58.673124",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "CIF Sheet",

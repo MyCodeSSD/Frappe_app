@@ -1,33 +1,36 @@
 {
  "actions": [],
- "autoname": "doc_rec-.####",
- "creation": "2025-06-13 14:01:03.518882",
+ "allow_rename": 1,
+ "creation": "2025-06-15 20:35:48.907633",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_bpdu",
+  "section_break_atoq",
   "amended_from",
   "inv_no",
   "inv_date",
   "category",
-  "column_break_xjqv",
+  "column_break_qgvl",
   "notify",
   "customer",
   "bank",
-  "column_break_nqdy",
+  "column_break_wnmb",
   "payment_term",
-  "term_days",
+  "due_date",
   "document",
-  "section_break_fhxi",
-  "received_date",
-  "column_break_ccyd",
-  "received",
-  "column_break_yjbk",
+  "section_break_hfiw",
+  "nego_date",
+  "nego_amount",
+  "column_break_fpzm",
+  "term_days",
+  "bank_due_date",
+  "column_break_clxl",
+  "due_date_confirm",
   "note"
  ],
  "fields": [
   {
-   "fieldname": "section_break_bpdu",
+   "fieldname": "section_break_atoq",
    "fieldtype": "Section Break"
   },
   {
@@ -35,7 +38,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Doc Received",
+   "options": "Doc Nego",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -45,113 +48,121 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Inv No",
-   "no_copy": 1,
    "options": "CIF Sheet",
-   "reqd": 1,
-   "set_only_once": 1
-  },
-  {
-   "fieldname": "inv_date",
-   "fieldtype": "Date",
-   "label": "Inv Date",
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "category",
    "fieldtype": "Link",
    "label": "Category",
-   "options": "Product Category",
-   "set_only_once": 1
-  },
-  {
-   "fieldname": "column_break_xjqv",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "notify",
-   "fieldtype": "Link",
-   "label": "Notify",
-   "options": "Notify",
-   "set_only_once": 1
+   "options": "Product Category"
   },
   {
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "options": "Customer",
-   "set_only_once": 1
+   "options": "Customer"
+  },
+  {
+   "fieldname": "notify",
+   "fieldtype": "Link",
+   "label": "Notify",
+   "options": "Notify"
+  },
+  {
+   "fieldname": "column_break_qgvl",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "bank",
    "fieldtype": "Link",
    "label": "Bank",
-   "options": "Bank",
-   "set_only_once": 1
+   "options": "Bank"
   },
   {
-   "fieldname": "column_break_nqdy",
+   "fieldname": "column_break_wnmb",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "payment_term",
    "fieldtype": "Data",
-   "label": "Payment Term",
-   "set_only_once": 1
+   "label": "Payment Term"
   },
   {
-   "fieldname": "term_days",
-   "fieldtype": "Int",
-   "label": "Term Days",
-   "set_only_once": 1
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date"
   },
   {
    "fieldname": "document",
    "fieldtype": "Float",
    "label": "Document",
-   "precision": "2",
-   "set_only_once": 1
+   "precision": "2"
   },
   {
-   "fieldname": "section_break_fhxi",
-   "fieldtype": "Section Break"
+   "fieldname": "section_break_hfiw",
+   "fieldtype": "Section Break",
+   "label": "Nego Details"
   },
   {
-   "fieldname": "received",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Received",
-   "precision": "2",
-   "reqd": 1
-  },
-  {
-   "fieldname": "received_date",
+   "fieldname": "nego_date",
    "fieldtype": "Date",
-   "label": "Received Date",
+   "label": "Nego Date",
    "reqd": 1
   },
   {
-   "fieldname": "column_break_ccyd",
+   "fieldname": "column_break_fpzm",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_yjbk",
+   "fieldname": "nego_amount",
+   "fieldtype": "Float",
+   "label": "Nego Amount",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_clxl",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "note",
    "fieldtype": "Data",
    "label": "Note"
+  },
+  {
+   "fieldname": "term_days",
+   "fieldtype": "Int",
+   "label": "Term Days",
+   "non_negative": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_due_date",
+   "fieldtype": "Date",
+   "label": "Bank Due Date",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "due_date_confirm",
+   "fieldtype": "Check",
+   "label": "Due Date Confirm"
+  },
+  {
+   "fieldname": "inv_date",
+   "fieldtype": "Date",
+   "label": "Inv Date"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-15 22:24:32.419326",
+ "modified": "2025-06-15 23:29:16.539216",
  "modified_by": "Administrator",
  "module": "My Custom",
- "name": "Doc Received",
- "naming_rule": "Expression (old style)",
+ "name": "Doc Nego",
  "owner": "Administrator",
  "permissions": [
   {
