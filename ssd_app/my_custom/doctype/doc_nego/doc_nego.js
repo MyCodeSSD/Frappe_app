@@ -108,7 +108,6 @@ function calc_due_date(frm) {
 }
 
 
-
 frappe.ui.form.on("Doc Nego", {
 	setup(frm) {
         inv_no_filter(frm);  // ✅ Register custom filter
