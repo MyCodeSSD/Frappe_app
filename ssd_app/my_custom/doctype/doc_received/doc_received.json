@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "doc_rec-.####",
+ "autoname": "rec-.####",
  "creation": "2025-06-13 14:01:03.518882",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -147,7 +147,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-15 22:24:32.419326",
+ "modified": "2025-06-16 22:47:49.699992",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "Doc Received",

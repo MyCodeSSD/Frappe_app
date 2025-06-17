@@ -1,0 +1,142 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "ref-.####",
+ "creation": "2025-06-16 21:30:35.523145",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_6v5h",
+  "amended_from",
+  "inv_no",
+  "customer",
+  "bank",
+  "column_break_qqbz",
+  "notify",
+  "payment_term",
+  "nego_amount",
+  "section_break_sumz",
+  "refund_date",
+  "column_break_rgxl",
+  "refund_amount",
+  "column_break_dpof",
+  "note"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_6v5h",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Doc Refund",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "inv_no",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Inv No",
+   "options": "CIF Sheet",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_qqbz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank"
+  },
+  {
+   "fieldname": "notify",
+   "fieldtype": "Link",
+   "label": "Notify",
+   "options": "Notify"
+  },
+  {
+   "fieldname": "nego_amount",
+   "fieldtype": "Float",
+   "label": "Nego Amount",
+   "precision": "2"
+  },
+  {
+   "fieldname": "payment_term",
+   "fieldtype": "Data",
+   "label": "Payment Term"
+  },
+  {
+   "fieldname": "section_break_sumz",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "refund_date",
+   "fieldtype": "Date",
+   "label": "Refund Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_rgxl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "refund_amount",
+   "fieldtype": "Float",
+   "label": "Refund Amount",
+   "non_negative": 1,
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_dpof",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Data",
+   "label": "Note"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-06-17 23:45:44.244634",
+ "modified_by": "Administrator",
+ "module": "My Custom",
+ "name": "Doc Refund",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

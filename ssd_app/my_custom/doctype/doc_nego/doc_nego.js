@@ -33,9 +33,9 @@ function get_cif_data(frm) {
                 term_days: data.term_days,
                 due_date: data.due_date,
                 document: data.document,
-                received: data.receivable,
                 nego_date: frappe.datetime.get_today(),
-                nego_amount: data.can_nego
+                nego_amount: data.can_nego,
+                bank_due_date:frappe.datetime.add_days(frm.doc.nego_date, data.term_days)
                 
             });
 

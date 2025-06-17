@@ -34,11 +34,11 @@ class DocNego(Document):
 		if self.nego_amount > round(can_nego, 2):
 			frappe.throw(_(f"""
 				❌ <b>Nego amount exceeds the Document Amount.</b>
-				<br><b>CIF Document Amount:</b> {cif_document}
-				<br><b>Total Already Received:</b> {total_received}
-				<br><b>Total Already Nego:</b> {total_nego}
-				<br><b>Can Nego:</b> {can_nego}
-				<br><b>This Entry :</b> {self.nego_amount}
+				<br><b>CIF Document Amount:</b> {cif_document:,.2f}
+				<br><b>Total Already Received:</b> {total_received:,.2f}
+				<br><b>Total Already Nego:</b> {total_nego:,.2f}
+				<br><b>Can Nego:</b> {can_nego:,.2f}
+				<br><b>This Entry :</b> {self.nego_amount:,.2f}
 			"""))
 
 
@@ -64,10 +64,13 @@ def get_cif_data(inv_no):
         WHERE inv_no = %s
     """, (inv_no,))[0][0] or 0
 
-    cif["total_nego"] = round(total_nego, 2)
-    cif["total_received"] = round(total_received, 2)
-    cif["receivable"] = round((cif.get("document") or 0) - total_received, 2)
-    cif["can_nego"]= cif["receivable"]-round(total_nego, 2)
+    total_ref = frappe.db.sql("""
+        SELECT IFNULL(SUM(refund_amount), 0)
+        FROM `tabDoc Refund`
+        WHERE inv_no = %s
+    """, (inv_no,))[0][0] or 0
+    doc= cif.get("document")
+    cif["can_nego"]=(doc- total_nego) + min(total_ref-total_received,0)
 
     return cif
 

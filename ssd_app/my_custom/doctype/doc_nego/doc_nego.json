@@ -1,6 +1,6 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "nego-.####",
  "creation": "2025-06-15 20:35:48.907633",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -49,25 +49,29 @@
    "in_list_view": 1,
    "label": "Inv No",
    "options": "CIF Sheet",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "category",
    "fieldtype": "Link",
    "label": "Category",
-   "options": "Product Category"
+   "options": "Product Category",
+   "set_only_once": 1
   },
   {
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "set_only_once": 1
   },
   {
    "fieldname": "notify",
    "fieldtype": "Link",
    "label": "Notify",
-   "options": "Notify"
+   "options": "Notify",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_qgvl",
@@ -77,7 +81,8 @@
    "fieldname": "bank",
    "fieldtype": "Link",
    "label": "Bank",
-   "options": "Bank"
+   "options": "Bank",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_wnmb",
@@ -86,18 +91,21 @@
   {
    "fieldname": "payment_term",
    "fieldtype": "Data",
-   "label": "Payment Term"
+   "label": "Payment Term",
+   "set_only_once": 1
   },
   {
    "fieldname": "due_date",
    "fieldtype": "Date",
-   "label": "Due Date"
+   "label": "Due Date",
+   "set_only_once": 1
   },
   {
    "fieldname": "document",
    "fieldtype": "Float",
    "label": "Document",
-   "precision": "2"
+   "precision": "2",
+   "set_only_once": 1
   },
   {
    "fieldname": "section_break_hfiw",
@@ -152,17 +160,19 @@
   {
    "fieldname": "inv_date",
    "fieldtype": "Date",
-   "label": "Inv Date"
+   "label": "Inv Date",
+   "set_only_once": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-15 23:29:16.539216",
+ "modified": "2025-06-16 22:48:37.132385",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "Doc Nego",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

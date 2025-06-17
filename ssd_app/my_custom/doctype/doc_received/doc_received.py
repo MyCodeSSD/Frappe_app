@@ -25,11 +25,12 @@ class DocReceived(Document):
         if total_with_current > round(cif_document, 2):
             frappe.throw(_(f"""
                 ❌ <b>Received amount exceeds the receivable limit.</b>
-                <br><b>CIF Document Amount:</b> {cif_document}
-                <br><b>Total Already Received:</b> {total_received}
-                <br><b>Receivable:</b> {receivable}
-                <br><b>This Entry:</b> {self.received}
+                <br><b>CIF Document Amount:</b> {cif_document:,.2f}
+                <br><b>Total Already Received:</b> {total_received:,.2f}
+                <br><b>Receivable:</b> {receivable:,.2f}
+                <br><b>This Entry:</b> {self.received:,.2f}
             """))
+
 
 
 @frappe.whitelist()
