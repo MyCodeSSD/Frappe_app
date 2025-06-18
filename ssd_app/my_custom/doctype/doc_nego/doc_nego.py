@@ -26,10 +26,7 @@ class DocNego(Document):
 			WHERE inv_no = %s AND name != %s
 		""", (self.inv_no, self.name))[0][0] or 0
 
-		# Add current form's value
-		# total_with_current = round(total_received + (self.received or 0), 2)
-		receivable = round(cif_document - total_received, 2)
-		can_nego = round(cif_document - total_received- total_nego, 2)
+		can_nego = round((cif_document- total_nego) + min(total_nego-total_received,0), 2)
 
 		if self.nego_amount > round(can_nego, 2):
 			frappe.throw(_(f"""
@@ -63,14 +60,8 @@ def get_cif_data(inv_no):
         FROM `tabDoc Nego`
         WHERE inv_no = %s
     """, (inv_no,))[0][0] or 0
-
-    total_ref = frappe.db.sql("""
-        SELECT IFNULL(SUM(refund_amount), 0)
-        FROM `tabDoc Refund`
-        WHERE inv_no = %s
-    """, (inv_no,))[0][0] or 0
     doc= cif.get("document")
-    cif["can_nego"]=(doc- total_nego) + min(total_ref-total_received,0)
+    cif["can_nego"]=(doc- total_nego) + min(total_nego-total_received,0)
 
     return cif
 
@@ -87,23 +78,28 @@ def update_cif_bank_if_missing(inv_no, bank_value):
 
 @frappe.whitelist()
 def get_available_inv_no(doctype, txt, searchfield, start, page_len, filters):
-    return frappe.db.sql(f"""
+    query = """
         SELECT cif.name, cif.inv_no
-        FROM `tabCIF Sheet` AS cif
+        FROM ⁠ tabCIF Sheet ⁠ AS cif
         LEFT JOIN (
             SELECT inv_no, SUM(received) AS total_received
-            FROM `tabDoc Received`
+            FROM ⁠ tabDoc Received ⁠
             GROUP BY inv_no
         ) AS dr ON dr.inv_no = cif.name
         LEFT JOIN (
             SELECT inv_no, SUM(nego_amount) AS total_nego
-            FROM `tabDoc Nego`
+            FROM ⁠ tabDoc Nego ⁠
             GROUP BY inv_no
         ) AS dn ON dn.inv_no = cif.name
-        WHERE cif.document > 0 
-        AND cif.payment_term != 'TT'
-        AND cif.inv_no LIKE %s
-        AND ROUND(cif.document - IFNULL(dr.total_received, 0)-IFNULL(dn.total_nego, 0), 2) > 0
+        WHERE cif.document > 0
+          AND cif.payment_term != 'TT'
+          AND cif.inv_no LIKE %s
+          AND ROUND(
+              (cif.document - IFNULL(dn.total_nego, 0)) 
+              + LEAST(IFNULL(dn.total_nego, 0) - IFNULL(dr.total_received, 0), 0),
+              2
+          ) > 0
         ORDER BY cif.inv_no ASC
         LIMIT %s, %s
-    """, (f"%{txt}%", start, page_len))
+    """
+    return frappe.db.sql(query, (f"%{txt}%", start, page_len))
