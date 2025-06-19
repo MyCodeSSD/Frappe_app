@@ -10,7 +10,8 @@ frappe.query_reports["CIF Sheet Table"] = {
         //     options: "Customer",
         //     default: "",
         // },
+        
     ],
-
+    
 
 };
