@@ -79,27 +79,28 @@ def update_cif_bank_if_missing(inv_no, bank_value):
 @frappe.whitelist()
 def get_available_inv_no(doctype, txt, searchfield, start, page_len, filters):
     query = """
-        SELECT cif.name, cif.inv_no
-        FROM ⁠ tabCIF Sheet ⁠ AS cif
-        LEFT JOIN (
-            SELECT inv_no, SUM(received) AS total_received
-            FROM ⁠ tabDoc Received ⁠
-            GROUP BY inv_no
-        ) AS dr ON dr.inv_no = cif.name
-        LEFT JOIN (
-            SELECT inv_no, SUM(nego_amount) AS total_nego
-            FROM ⁠ tabDoc Nego ⁠
-            GROUP BY inv_no
-        ) AS dn ON dn.inv_no = cif.name
-        WHERE cif.document > 0
-          AND cif.payment_term != 'TT'
-          AND cif.inv_no LIKE %s
-          AND ROUND(
-              (cif.document - IFNULL(dn.total_nego, 0)) 
-              + LEAST(IFNULL(dn.total_nego, 0) - IFNULL(dr.total_received, 0), 0),
-              2
-          ) > 0
-        ORDER BY cif.inv_no ASC
-        LIMIT %s, %s
+    SELECT cif.name, cif.inv_no
+    FROM `tabCIF Sheet` AS cif
+    LEFT JOIN (
+        SELECT inv_no, SUM(received) AS total_received
+        FROM `tabDoc Received`
+        GROUP BY inv_no
+    ) AS dr ON dr.inv_no = cif.name
+    LEFT JOIN (
+        SELECT inv_no, SUM(nego_amount) AS total_nego
+        FROM `tabDoc Nego`
+        GROUP BY inv_no
+    ) AS dn ON dn.inv_no = cif.name
+    WHERE cif.document > 0
+        AND cif.payment_term != 'TT'
+        AND cif.inv_no LIKE %s
+        AND ROUND(
+            (cif.document - IFNULL(dn.total_nego, 0)) 
+            + LEAST(IFNULL(dn.total_nego, 0) - IFNULL(dr.total_received, 0), 0),
+            2
+        ) > 0
+    ORDER BY cif.inv_no ASC
+    LIMIT %s, %s
     """
+
     return frappe.db.sql(query, (f"%{txt}%", start, page_len))
