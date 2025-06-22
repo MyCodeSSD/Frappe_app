@@ -17,36 +17,28 @@ frappe.query_reports["CIF Sheet Table"] = {
             frappe.set_route("List", "CIF Sheet");
         });
     },
-    formatter: function(value, row, column, data, default_formatter) {
-    value = default_formatter(value, row, column, data);
+        formatter: function(value, row, column, data, default_formatter) {
+        value = default_formatter(value, row, column, data);
 
-    // 🎯 Highlight status column
-    if (column.fieldname === "status") {
-        if (value === "Paid") {
-            return `<span style="color: green; font-weight: bold;">${value}</span>`;
-        } else if (value === "Part") {
-            return `<span style="color: purple; font-weight: bold;">${value}</span>`;
-        } else if (value === "Unpaid") {
-            return `<span style="color: red; font-weight: bold;">${value}</span>`;
+        // 🎯 Highlight status column
+        if (column.fieldname === "status") {
+            if (value === "Paid") {
+                return `<span style="color: green; font-weight: bold;">${value}</span>`;
+            } else if (value === "Part") {
+                return `<span style="color: purple; font-weight: bold;">${value}</span>`;
+            } else if (value === "Unpaid") {
+                return `<span style="color: red; font-weight: bold;">${value}</span>`;
+            }
         }
-    }
 
-    // 🔗 Clickable inv_no with modal
-    if (column.fieldname === "inv_no" && data && data.name) {
-        return `<a href="#" onclick="showCIFDetails('${data.name}'); return false;">${data.inv_no}</a>`;
-    }
+        // 🔗 Clickable inv_no with modal
+        if (column.fieldname === "inv_no" && data && data.name) {
+            return `<a href="#" onclick="showCIFDetails('${data.name}'); return false;">${data.inv_no}</a>`;
+        }
 
-    return value;
-},
-	filters: [
-        // {
-        //     fieldname: "customer",
-        //     label: "Customer",
-        //     fieldtype: "Link",
-        //     options: "Customer",
-        //     default: "",
-        // },
-        
+        return value;
+    },
+	filters: [        
     ],
 };
 
@@ -60,7 +52,7 @@ function showCIFDetails(inv_name) {
             if (r.message) {
                 let dialog = new frappe.ui.Dialog({
                     title: 'CIF Details: ' + inv_name,
-                    size: 'extra-large',
+                    size: 'large',
                     primary_action_label: 'PDF',
                     primary_action: () => {
                         window.open(`/api/method/ssd_app.my_custom.report.cif_sheet_table.cif_sheet_table.download_cif_pdf?inv_name=${inv_name}`, '_blank');
@@ -69,7 +61,7 @@ function showCIFDetails(inv_name) {
                         {
                             fieldtype: 'HTML',
                             fieldname: 'details_html',
-                            options: `<div id="cif-details-a4" style="width: 21cm; min-height: 29.7cm; padding: 1.5cm; background: white; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2);">${r.message}</div>`
+                            options: `<div id="cif-details-a4" style="width: 20cm; min-height: 29.7cm; padding: 1.5cm; background: white; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2);">${r.message}</div>`
                         }
                     ]
                 });

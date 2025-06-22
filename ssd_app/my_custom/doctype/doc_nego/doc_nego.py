@@ -4,40 +4,66 @@
 import frappe
 from frappe.model.document import Document
 from frappe import _
+from datetime import datetime, timedelta
 
-class DocNego(Document):
-	def validate(self):
-		if not self.inv_no:
-			return
 
-		# Fetch CIF document value
-		cif_document = frappe.db.get_value("CIF Sheet", self.inv_no, "document") or 0
+def final_validation(doc):
+    if not doc.inv_no:
+        return
 
-		# Total received from other Doc Received entries (excluding current one)
-		total_received = frappe.db.sql("""
-			SELECT IFNULL(SUM(received), 0)
-			FROM `tabDoc Received`
-			WHERE inv_no = %s AND name != %s
-		""", (self.inv_no, self.name))[0][0] or 0
+    # Fetch CIF document value
+    cif_document = frappe.db.get_value("CIF Sheet", doc.inv_no, "document") or 0
 
-		total_nego = frappe.db.sql("""
-			SELECT IFNULL(SUM(nego_amount), 0)
-			FROM `tabDoc Nego`
-			WHERE inv_no = %s AND name != %s
-		""", (self.inv_no, self.name))[0][0] or 0
+    # Total received from other Doc Received entries (excluding current one)
+    total_received = frappe.db.sql("""
+        SELECT IFNULL(SUM(received), 0)
+        FROM `tabDoc Received`
+        WHERE inv_no = %s 
+    """, (doc.inv_no))[0][0] or 0
 
-		can_nego = round((cif_document- total_nego) + min(total_nego-total_received,0), 2)
+    # Total nego from other Doc Nego entries (excluding current one)
+    total_nego = frappe.db.sql("""
+        SELECT IFNULL(SUM(nego_amount), 0)
+        FROM `tabDoc Nego`
+        WHERE inv_no = %s AND name != %s 
+    """, (doc.inv_no, doc.name))[0][0] or 0
 
-		if self.nego_amount > round(can_nego, 2):
-			frappe.throw(_(f"""
-				❌ <b>Nego amount exceeds the Document Amount.</b>
-				<br><b>CIF Document Amount:</b> {cif_document:,.2f}
-				<br><b>Total Already Received:</b> {total_received:,.2f}
-				<br><b>Total Already Nego:</b> {total_nego:,.2f}
-				<br><b>Can Nego:</b> {can_nego:,.2f}
-				<br><b>This Entry :</b> {self.nego_amount:,.2f}
-			"""))
+    # Can Nego calculation
+    can_nego = round((cif_document - total_nego) + min(total_nego - total_received, 0), 2)
+    nego = doc.nego_amount or 0
 
+    if nego > can_nego:
+        frappe.throw(_(f"""
+            ❌ <b>Nego amount exceeds the Document Amount.</b><br>
+            <b>CIF Document Amount:</b> {cif_document:,.2f}<br>
+            <b>Total Already Received:</b> {total_received:,.2f}<br>
+            <b>Total Already Nego:</b> {total_nego:,.2f}<br>
+            <b>Can Nego:</b> {can_nego:,.2f}<br>
+            <b>This Entry:</b> {doc.nego_amount:,.2f}
+        """))
+        doc.nego_amount= None
+
+    # Validate Nego Date
+    inv_date = frappe.db.get_value("CIF Sheet", doc.inv_no, "inv_date") or ""
+
+    # convert strings to date if needed
+    if isinstance(doc.nego_date, str):
+        nego_date = datetime.strptime(doc.nego_date, "%Y-%m-%d").date()
+
+    if isinstance(inv_date, str):
+        inv_date = datetime.strptime(inv_date, "%Y-%m-%d").date()
+
+    if nego_date and inv_date and nego_date < inv_date:
+        frappe.msgprint(
+            _("🛑 <b>Nego Date</b> cannot be before the <b>Invoice Date</b>. Please correct the dates."),
+            title=_("Date Validation Error")
+        )
+        doc.nego_date = None
+
+
+class DocNego(Document): 
+    def validate(self):
+        final_validation(self)
 
 
 @frappe.whitelist()
@@ -102,5 +128,4 @@ def get_available_inv_no(doctype, txt, searchfield, start, page_len, filters):
     ORDER BY cif.inv_no ASC
     LIMIT %s, %s
     """
-
     return frappe.db.sql(query, (f"%{txt}%", start, page_len))

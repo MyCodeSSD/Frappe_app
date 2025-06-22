@@ -206,6 +206,15 @@ frappe.ui.form.on("CIF Sheet", {
     },
     document(frm) {
         calculate_cc(frm);
+        handle_payment_term_lock(frm);
+        lock_bank_in_tt(frm);
+        lock_term_days(frm);
+        calculate_due_date(frm);
+    },
+    payment_term(frm){
+        lock_bank_in_tt(frm);
+        lock_term_days(frm);
+        calculate_due_date(frm);
     },
     insurance_pct: calculate_and_refresh,
     insurance_based_on: calculate_and_refresh,
@@ -217,9 +226,41 @@ frappe.ui.form.on("CIF Sheet", {
 // Shared logic for handling/insurance field changes
 function calculate_and_refresh(frm) {
     calculate_sales(frm);
-    calculate_cc(frm);
-    
+    calculate_cc(frm); 
 }
+
+// payment term on document ==0
+function handle_payment_term_lock(frm) {
+    if (frm.doc.document == 0) {
+        frm.set_value('payment_term', 'TT');
+        frm.set_df_property('payment_term', 'read_only', 1);
+        frm.set_df_property('bank_ref_no', 'read_only', 1);
+    } else {
+        frm.set_df_property('payment_term', 'read_only', 0);
+        frm.set_df_property('bank_ref_no', 'read_only', 0);
+    }
+}
+
+// Lock bank for payment term=TT
+function lock_bank_in_tt(frm) {
+    if (frm.doc.payment_term == "TT") {
+        frm.set_df_property('bank', 'read_only', 1);
+    } else {
+        frm.set_df_property('bank', 'read_only', 0);
+    }
+}
+// Fixed & lock Term-days
+function lock_term_days(frm) {
+    if (frm.doc.payment_term == "TT" || 
+        frm.doc.payment_term == "DP" || 
+        frm.doc.payment_term == "LC at Sight") {
+            frm.set_value("term_days", 30);
+            frm.set_df_property('term_days', 'read_only', 1);
+    } else {
+        frm.set_df_property('term_days', 'read_only', 0);
+    }
+}
+
 
 
 // ---------------------- Product Child Table ----------------------
@@ -287,31 +328,31 @@ frappe.ui.form.on("Product CIF", {
     round_off_usd: update_all
 });
 
+// Update all calculations for product child table
 function update_all(frm, cdt, cdn) {
     calculate_gross(cdt, cdn);
     calculate_gross_usd(cdt, cdn);
     calculate_sales(frm);
     calculate_cc(frm);
-    
 }
 
-// ---------------------- Expense Child Table ----------------------
 
-function calculate_exp(cdt, cdn) {
-    const row = locals[cdt][cdn];
-    frappe.model.set_value(cdt, cdn, "amount_usd", flt(flt(row.amount) / flt(row.ex_rate)),2);
-}
+// ---------------------- Expense Child Table: Expenses CIF ----------------------
 
 frappe.ui.form.on("Expenses CIF", {
     amount: update_exp_and_totals,
     ex_rate: update_exp_and_totals
 });
 
+function calculate_exp(cdt, cdn) {
+    const row = locals[cdt][cdn];
+    frappe.model.set_value(cdt, cdn, "amount_usd", flt(flt(row.amount) / flt(row.ex_rate)), 2);
+}
+
 function update_exp_and_totals(frm, cdt, cdn) {
     calculate_exp(cdt, cdn);
     calculate_sales(frm);
     calculate_cc(frm);
 }
-
 
 

@@ -5,12 +5,10 @@ import frappe
 from frappe.utils import formatdate, flt
 from frappe.utils.jinja import render_template
 from frappe import _
-from datetime import date, timedelta
 
 
-today_str = date.today().strftime("%Y-%m-%d")
 
-def execute(filters=None):    
+def execute(filters=None):
 	# columns, data = [], []
 	conditional_filter= ""
 	if(filters.based_on=="Receivable"):
@@ -46,87 +44,85 @@ def execute(filters=None):
 		{"label": "Coll", "fieldname": "coll", "fieldtype": "Float", "width": 100},
 		{"label": "Nego", "fieldname": "nego", "fieldtype": "Float", "width": 100},
 		{"label": "Refund", "fieldname": "ref", "fieldtype": "Float", "width": 100},
-        # {"label": "Action", "fieldname": "action", "fieldtype": "HTML", "width": 80},
 	]
 
 	data=frappe.db.sql(f"""
-        SELECT 
-        cif.name, 
-        cif.inv_no,
-        cif.inv_date, 
-        cus.code AS customer, 
-        noti.code AS notify, 
-        bank.bank,  
-        IF(cif.payment_term IN ('LC', 'DA'),
-        CONCAT(cif.payment_term, '- ', cif.term_days),
-        cif.payment_term) AS p_term,
-        ROUND(cif.document,0) AS document, 
-        cif.due_date,
-        IFNULL(nego.total_nego, 0) AS total_nego,
-        IFNULL(nego.bank_due_date, null) AS bank_due_date,
-        DATEDIFF(nego.bank_due_date, CURDATE()) AS days_to_due,
-        nego.due_date_confirm,
-        IFNULL(ref.total_ref, 0) AS total_ref,
-        IFNULL(rec.total_rec, 0) AS total_rec,
-        ROUND(cif.document - IFNULL(rec.total_rec, 0), 2) AS receivable,
-        IFNULL( ROUND(
-            (cif.document - IFNULL(nego.total_nego, 0)) 
-            + LEAST(IFNULL(nego.total_nego, 0) - IFNULL(rec.total_rec, 0), 0),
-            2
-        ), 0) AS coll,
-        IFNULL( ROUND(
-            GREATEST((nego.total_nego - IFNULL(ref.total_ref, 0)) 
-            + LEAST(IFNULL(ref.total_ref, 0) - IFNULL(rec.total_rec, 0), 0),0),
-            2
-        ), 0) AS nego,
-        GREATEST(IFNULL(ref.total_ref, 0) - IFNULL(rec.total_rec, 0), 0) as ref			
-        FROM 
-            `tabCIF Sheet` cif
-        LEFT JOIN (
-            SELECT 
-                inv_no, 
-                SUM(nego_amount) AS total_nego,
-                MIN(bank_due_date) AS bank_due_date,
-                MIN(due_date_confirm) AS due_date_confirm
-            FROM 
-                `tabDoc Nego`
-            WHERE nego_date <= %(as_on)s
-            GROUP BY 
-                inv_no
-        ) AS nego ON cif.name = nego.inv_no
-        LEFT JOIN (
-            SELECT 
-                inv_no, 
-                SUM(refund_amount) AS total_ref
-            FROM 
-                `tabDoc Refund`
-            WHERE refund_date <= %(as_on)s
-            GROUP BY 
-                inv_no
-        ) AS ref ON cif.name = ref.inv_no
-        LEFT JOIN (
-            SELECT 
-                inv_no, 
-                SUM(received) AS total_rec
-            FROM 
-                `tabDoc Received`
-            WHERE received_date <= %(as_on)s
-            GROUP BY 
-                inv_no
-        ) AS rec ON cif.name = rec.inv_no
-        LEFT JOIN `tabCustomer` cus ON cif.customer= cus.name
-        LEFT JOIN `tabNotify` noti ON cif.notify= noti.name
-        LEFT JOIN `tabBank` bank ON cif.bank= bank.name
-        WHERE 
-            cif.payment_term != 'TT'
-            {conditional_filter}
-            AND cif.inv_date <= %(as_on)s
-        ORDER BY 
-            cif.inv_no ASC;""",
-        {"as_on": as_on}, as_dict=1)
-    
+	SELECT 
+		cif.name, 
+		cif.inv_no,
+		cif.inv_date, 
+		cus.code AS customer, 
+		noti.code AS notify, 
+		bank.bank,  
+		IF(cif.payment_term IN ('LC', 'DA'),
+		CONCAT(cif.payment_term, '- ', cif.term_days),
+		cif.payment_term) AS p_term,
+		ROUND(cif.document,0) AS document, 
+		cif.due_date,
+		IFNULL(nego.total_nego, 0) AS total_nego,
+		IFNULL(nego.bank_due_date, null) AS bank_due_date,
+		IFNULL(nego.due_date_confirm, 0) AS due_date_confirm,
+		IFNULL(ref.total_ref, 0) AS total_ref,
+		IFNULL(rec.total_rec, 0) AS total_rec,
+		ROUND(cif.document - IFNULL(rec.total_rec, 0), 2) AS receivable,
+		IFNULL( ROUND(
+			(cif.document - IFNULL(nego.total_nego, 0)) 
+			+ LEAST(IFNULL(nego.total_nego, 0) - IFNULL(rec.total_rec, 0), 0),
+			2
+		), 0) AS coll,
+		IFNULL( ROUND(
+			GREATEST((nego.total_nego - IFNULL(ref.total_ref, 0)) 
+			+ LEAST(IFNULL(ref.total_ref, 0) - IFNULL(rec.total_rec, 0), 0),0),
+			2
+		), 0) AS nego,
+		GREATEST(IFNULL(ref.total_ref, 0) - IFNULL(rec.total_rec, 0), 0) as ref			
+		FROM 
+			`tabCIF Sheet` cif
+		LEFT JOIN (
+			SELECT 
+				inv_no, 
+				SUM(nego_amount) AS total_nego,
+				MIN(bank_due_date) AS bank_due_date,
+				MIN(due_date_confirm) AS due_date_confirm
+			FROM 
+				`tabDoc Nego`
+			WHERE nego_date <= %(as_on)s
+			GROUP BY 
+				inv_no
+		) AS nego ON cif.name = nego.inv_no
+		LEFT JOIN (
+			SELECT 
+				inv_no, 
+				SUM(refund_amount) AS total_ref
+			FROM 
+				`tabDoc Refund`
+			WHERE refund_date <= %(as_on)s
+			GROUP BY 
+				inv_no
+		) AS ref ON cif.name = ref.inv_no
+		LEFT JOIN (
+			SELECT 
+				inv_no, 
+				SUM(received) AS total_rec
+			FROM 
+				`tabDoc Received`
+			WHERE received_date <= %(as_on)s
+			GROUP BY 
+				inv_no
+		) AS rec ON cif.name = rec.inv_no
+		LEFT JOIN `tabCustomer` cus ON cif.customer= cus.name
+		LEFT JOIN `tabNotify` noti ON cif.notify= noti.name
+		LEFT JOIN `tabBank` bank ON cif.bank= bank.name
+		WHERE 
+			cif.payment_term != 'TT'
+			{conditional_filter}
+			AND cif.inv_date <= %(as_on)s
+		ORDER BY 
+			cif.inv_no ASC;
+
+
+	""",{"as_on": as_on}, as_dict=1)
 	return columns, data
-    
 
 
 
@@ -142,20 +138,20 @@ def get_doc_flow(inv_name):
 
     sales_amount = doc.document or 0
 
-    inv = [{"name":doc.name,"Type": "Sales", "Date": doc.inv_date, "Amount": sales_amount, "Note":""}]
+    inv = [{"Type": "Sales", "Date": doc.inv_date, "Amount": sales_amount}]
     
     nego = frappe.db.sql("""
-        SELECT name, 'Nego' AS Type, nego_date AS Date, nego_amount AS Amount , note as Note
+        SELECT 'Negotiation' AS Type, nego_date AS Date, nego_amount AS Amount 
         FROM `tabDoc Nego` WHERE inv_no = %s
     """, (inv_name,), as_dict=1)
     
     ref = frappe.db.sql("""
-        SELECT name, 'Refund' AS Type, refund_date AS Date, refund_amount AS Amount ,note as Note
+        SELECT 'Refund' AS Type, refund_date AS Date, refund_amount AS Amount 
         FROM `tabDoc Refund` WHERE inv_no = %s
     """, (inv_name,), as_dict=1)
     
     rec = frappe.db.sql("""
-        SELECT name,'Received' AS Type, received_date AS Date, received AS Amount , note as Note
+        SELECT 'Received' AS Type, received_date AS Date, received AS Amount 
         FROM `tabDoc Received` WHERE inv_no = %s
     """, (inv_name,), as_dict=1)
 
@@ -173,13 +169,11 @@ def get_doc_flow(inv_name):
     for entry in combined:
         typ = entry['Type']
         amt = entry['Amount'] or 0
-        nte= entry['Note'] or ""
-        name= entry['name']
 
         if typ == "Sales":
             coll += amt
 
-        elif typ == "Nego":
+        elif typ == "Negotiation":
             coll -= amt
             nego_amt += amt
 
@@ -229,9 +223,7 @@ def get_doc_flow(inv_name):
             <td style="text-align: right;background-color: silver;">{frappe.utils.fmt_money(coll)}</td>
             <td style="text-align: right;background-color: silver;">{frappe.utils.fmt_money(nego_amt)}</td>
             <td style="text-align: right;background-color: silver;">{frappe.utils.fmt_money(refund)}</td>
-            <td style="text-align: right;background-color: silver;">{nte}</td>
-            
-
+        </tr>
         """
         
     details_html = f"""
@@ -251,62 +243,27 @@ def get_doc_flow(inv_name):
         </table>
     </div>
     """
-    buttons_html = ""
-    due_date = date.today() + timedelta(days=doc.term_days + 90)
-    due_date_str = due_date.strftime("%Y-%m-%d")
-
-    if coll > 0:
-        buttons_html += f"""
-        <a href="#"  onclick="frappe.new_doc('Doc Nego', {{ inv_no: '{inv_name}'}}); return false;" 
-        class="btn btn-primary btn-sm" style="margin-left: 8px; background-color:blue;">Nego</a>
-        """
-
-
-    if nego_amt > 0:
-        buttons_html += f"""
-        <a href="#" onclick="frappe.new_doc('Doc Refund', {{ inv_no: '{inv_name}' }}); return false;" 
-        class="btn btn-danger btn-sm" style="margin-left: 8px;background-color:red;">Refund</a>"""
-        
-
-    # if (sales_amount - received) > 0:
-    #     buttons_html += f"""
-    #     <a href="#" onclick="frappe.new_doc('Doc Received', {{ inv_no: '{inv_name}' }}); return false;" 
-    #     class="btn btn-success btn-sm" style="margin-left: 8px; background-color:green;">Received</a>"""
-    if (sales_amount - received) > 0:
-        buttons_html += f"""
-        <a href="#" onclick="frappe.new_doc('Doc Received', {{ inv_no: '{inv_name}' }}); return false;" 
-        class="btn btn-success btn-sm" style="margin-left: 8px; background-color:green;">Received</a>
-        """
-
-
-        
 
     html = f"""
     <div>
 		{details_html}
-        <table class="table table-bordered" style="font-size: 14px;">
+        <table class="table table-bordered" style="font-size: 13px;">
             <thead>
                 <tr>
-                    <th style="width: 5%;">Type</th>
-                    <th style="width: 15%;">Date</th>
-                    <th style="width: 10%; text-align: right;">Amount</th>
-                    <th style="width: 10%; text-align: right;">Received</th>
-                    <th style="width: 10%; text-align: right;">Receivable</th>
-                    <th style="width: 10%; text-align: right; background-color: silver;">Coll</th>
-                    <th style="width: 10%; text-align: right; background-color: silver;">Nego</th>
-                    <th style="width: 10%; text-align: right; background-color: silver;">Refund</th>
-                    <th style="width: 20%; text-align: right; background-color: silver;">Note</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th style="text-align: right;">Amount</th>
+                    <th style="text-align: right;">Received</th>
+                    <th style="text-align: right;">Receivable</th>
+                    <th style="text-align: right;background-color: silver;">Coll</th>
+                    <th style="text-align: right;background-color: silver;">Nego</th>
+                    <th style="text-align: right;background-color: silver;">Refund</th>
                 </tr>
             </thead>
             <tbody>
                 {rows}
             </tbody>
         </table>
-    <div>
-
-    <div style="text-align: right; margin-top: 10px;">
-        {buttons_html}
-    </div>
     </div>
     """
     return html

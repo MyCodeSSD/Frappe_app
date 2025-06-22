@@ -121,6 +121,9 @@ frappe.ui.form.on("Doc Nego", {
     bank_due_date(frm){
        calc_term_days(frm);
     },
+    nego_date(frm){
+       calc_due_date(frm);
+    },
     term_days(frm){
         calc_due_date(frm);
     }
