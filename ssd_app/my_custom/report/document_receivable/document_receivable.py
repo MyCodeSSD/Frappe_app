@@ -190,14 +190,6 @@ def get_doc_flow(inv_name):
         elif typ == "Received":
             remain = amt
 
-            # 1. Subtract from refund
-            if refund >= remain:
-                refund -= remain
-                remain = 0
-            else:
-                remain -= refund
-                refund = 0
-
             # 2. Subtract from nego
             if remain > 0:
                 if nego_amt >= remain:
@@ -206,6 +198,15 @@ def get_doc_flow(inv_name):
                 else:
                     remain -= nego_amt
                     nego_amt = 0
+
+            # 1. Subtract from refund
+            if refund >= remain:
+                refund -= remain
+                remain = 0
+            else:
+                remain -= refund
+                refund = 0
+
 
             # 3. Subtract from coll
             if remain > 0:

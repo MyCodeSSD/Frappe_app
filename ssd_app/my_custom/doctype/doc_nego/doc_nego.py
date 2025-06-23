@@ -32,7 +32,7 @@ def final_validation(doc):
     can_nego = round((cif_document - total_nego) + min(total_nego - total_received, 0), 2)
     nego = doc.nego_amount or 0
 
-    if nego > can_nego:
+    if doc.is_new() and nego > can_nego:
         frappe.throw(_(f"""
             ❌ <b>Nego amount exceeds the Document Amount.</b><br>
             <b>CIF Document Amount:</b> {cif_document:,.2f}<br>
@@ -41,7 +41,15 @@ def final_validation(doc):
             <b>Can Nego:</b> {can_nego:,.2f}<br>
             <b>This Entry:</b> {doc.nego_amount:,.2f}
         """))
-        doc.nego_amount= None
+        
+
+    if (total_nego + doc.nego_amount)>cif_document:
+        frappe.throw(_(f"""
+            ❌ <b> Total Nego amount exceeds the Document Amount.</b><br>
+            <b>CIF Document Amount:</b> {cif_document:,.2f}<br>
+            <b>Total Already Nego:</b> {total_nego:,.2f}<br>
+            <b>This Entry:</b> {doc.nego_amount:,.2f}
+        """))
 
     # Validate Nego Date
     inv_date = frappe.db.get_value("CIF Sheet", doc.inv_no, "inv_date") or ""

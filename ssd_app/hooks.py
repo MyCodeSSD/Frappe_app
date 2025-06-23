@@ -5,6 +5,13 @@ app_description = "For office"
 app_email = "ssdolui.in@gmail.com"
 app_license = "mit"
 
+
+# mY cUSTOM TO USE MY FAVICON
+website_context = {
+    "favicon": "/assets/ssd_app/favicon.ico"
+}
+
+
 # Apps
 # ------------------
 
