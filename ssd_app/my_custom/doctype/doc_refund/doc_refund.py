@@ -4,33 +4,31 @@
 import frappe
 from frappe.model.document import Document
 
+# ----------------------------
+# 🔁 Utility: Aggregate sums by inv_no
+# ----------------------------
+def get_total(table, field, inv_no, exclude_name=None):
+    condition = "AND name != %(exclude_name)s" if exclude_name else ""
+    params = {"inv_no": inv_no}
+    if exclude_name:
+        params["exclude_name"] = exclude_name
+
+    return frappe.db.sql(f"""
+        SELECT IFNULL(SUM({field}), 0)
+        FROM `tab{table}`
+        WHERE inv_no = %(inv_no)s {condition}
+    """, params)[0][0]
+
+# ----------------------------
+# 🔎 Validate refund entry
+# ----------------------------
 def final_validation(doc):
-    # Get total received for this invoice
-    total_received = frappe.db.sql("""
-        SELECT IFNULL(SUM(received), 0)
-        FROM `tabDoc Received`
-        WHERE inv_no = %s
-    """, (doc.inv_no,))[0][0]
+    total_received = get_total("Doc Received", "received", doc.inv_no)
+    total_nego     = get_total("Doc Nego", "nego_amount", doc.inv_no)
+    total_ref      = get_total("Doc Refund", "refund_amount", doc.inv_no, exclude_name=doc.name)
 
-    # Get total negotiated amount
-    total_nego = frappe.db.sql("""
-        SELECT IFNULL(SUM(nego_amount), 0)
-        FROM `tabDoc Nego`
-        WHERE inv_no = %s
-    """, (doc.inv_no,))[0][0]
-
-    # Get total refunded already
-    total_ref = frappe.db.sql("""
-        SELECT IFNULL(SUM(refund_amount), 0)
-        FROM `tabDoc Refund`
-        WHERE inv_no = %s
-        AND name != %s  
-    """, (doc.inv_no, doc.name))[0][0]
-
-    # Compute pending Nego balance
     pending_nego = max(total_nego - total_received - total_ref, 0)
 
-    # Validation 1: For new docs only
     if doc.is_new() and pending_nego < doc.refund_amount:
         frappe.throw(f"""
             ❌ <b>Refund amount exceeds the Nego Amount.</b><br>
@@ -41,7 +39,6 @@ def final_validation(doc):
             <b>This Entry:</b> {doc.refund_amount:,.2f}
         """)
 
-    # Validation 2: Total Refund + current refund > Nego
     if (total_ref + doc.refund_amount) > total_nego:
         frappe.throw(f"""
             ❌ <b>Total Refund amount exceeds the Nego Amount.</b><br>
@@ -49,52 +46,35 @@ def final_validation(doc):
             <b>Total Refund (including this):</b> {(total_ref + doc.refund_amount):,.2f}
         """)
 
+# ----------------------------
+# 📄 DocType Class
+# ----------------------------
 class DocRefund(Document):
     def validate(self):
         final_validation(self)
 
-
-
-# @frappe.whitelist()
-# def get_available_inv_no(doctype, txt, searchfield, start, page_len, filters):
-# 	return frappe.db.sql(f"""
-#         SELECT cif.name, cif.inv_no FROM 
-#         (SELECT inv_no, SUM(nego_amount) AS total_nego 
-#         FROM `tabDoc Nego` GROUP BY inv_no) 
-#         AS nego 
-#         LEFT JOIN `tabCIF Sheet` AS cif ON cif.name = nego.inv_no 
-#         LEFT JOIN 
-#         (SELECT inv_no, SUM(received) AS total_rec FROM `tabDoc Received`
-#         GROUP BY inv_no) AS rec 
-#         ON rec.inv_no = nego.inv_no
-# 		(SELECT inv_no, SUM(ref_amount) AS total_ref FROM `tabDoc Refund`
-#         GROUP BY inv_no) AS ref 
-#         ON ref.inv_no = nego.inv_no
-#         WHERE COALESCE((nego.total_nego, 0) - COALESCE(rec.total_ref, 0)- COALESCE(rec.total_rec, 0)) > 0;
-#         """,)
-
+# ----------------------------
+# 🔍 For Link Field Filtering
+# ----------------------------
 @frappe.whitelist()
 def get_available_inv_no(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(f"""
+    return frappe.db.sql("""
         SELECT cif.name, cif.inv_no
         FROM (
             SELECT inv_no, SUM(nego_amount) AS total_nego
-            FROM `tabDoc Nego`
-            GROUP BY inv_no
+            FROM `tabDoc Nego` GROUP BY inv_no
         ) AS nego
         LEFT JOIN `tabCIF Sheet` AS cif ON cif.name = nego.inv_no
         LEFT JOIN (
             SELECT inv_no, SUM(received) AS total_rec
-            FROM `tabDoc Received`
-            GROUP BY inv_no
+            FROM `tabDoc Received` GROUP BY inv_no
         ) AS rec ON rec.inv_no = nego.inv_no
         LEFT JOIN (
             SELECT inv_no, SUM(refund_amount) AS total_ref
-            FROM `tabDoc Refund`
-            GROUP BY inv_no
+            FROM `tabDoc Refund` GROUP BY inv_no
         ) AS ref ON ref.inv_no = nego.inv_no
-        WHERE (COALESCE(nego.total_nego, 0) - COALESCE(ref.total_ref, 0)) > COALESCE(rec.total_rec, 0) 
-        AND (cif.name LIKE %(txt)s OR cif.inv_no LIKE %(txt)s)
+        WHERE (COALESCE(nego.total_nego, 0) - COALESCE(ref.total_ref, 0)) > COALESCE(rec.total_rec, 0)
+          AND (cif.name LIKE %(txt)s OR cif.inv_no LIKE %(txt)s)
         LIMIT %(start)s, %(page_len)s
     """, {
         "txt": f"%{txt}%",
@@ -102,36 +82,21 @@ def get_available_inv_no(doctype, txt, searchfield, start, page_len, filters):
         "page_len": page_len
     })
 
-
+# ----------------------------
+# 🧠 Get CIF data with computed nego amount
+# ----------------------------
 @frappe.whitelist()
 def get_cif_data(inv_no):
     cif = frappe.db.get_value(
         "CIF Sheet", inv_no,
-        ["inv_date", "category", "notify", "customer",
-         "bank", "payment_term", "term_days", "document"],
+        ["inv_date", "category", "notify", "customer", "bank", "payment_term", "term_days", "document"],
         as_dict=True
     ) or {}
 
-    total_received = frappe.db.sql("""
-        SELECT IFNULL(SUM(received), 0)
-        FROM `tabDoc Received`
-        WHERE inv_no = %s
-    """, (inv_no,))[0][0] or 0
-	
-    total_nego = frappe.db.sql("""
-        SELECT IFNULL(SUM(nego_amount), 0)
-        FROM `tabDoc Nego`
-        WHERE inv_no = %s
-    """, (inv_no,))[0][0] or 0
-	
-    total_ref = frappe.db.sql("""
-        SELECT IFNULL(SUM(refund_amount), 0)
-        FROM `tabDoc Refund`
-        WHERE inv_no = %s
-    """, (inv_no,))[0][0] or 0
+    total_received = get_total("Doc Received", "received", inv_no)
+    total_nego     = get_total("Doc Nego", "nego_amount", inv_no)
+    total_ref      = get_total("Doc Refund", "refund_amount", inv_no)
 
-    # cif["total_received"] = round(total_received, 2)
-    cif["nego_amount"]= total_nego-total_received-total_ref
-    # cif["receivable"] = round(cif["document"] - total_received, 2)
+    cif["nego_amount"] = total_nego - total_received - total_ref
 
     return cif

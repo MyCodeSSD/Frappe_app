@@ -65,6 +65,39 @@ def get_cif_data(inv_name=None):
     return data
 
 
+def get_cif_product_data(inv_name=None):
+    conditional_format = ""
+    values = ()
+
+    if inv_name:
+        conditional_format = "WHERE p.parent = %s"
+        values = (inv_name,)
+
+    data = frappe.db.sql("""
+        SELECT 
+            p.parent, 
+            pg.product_group, 
+            pro.product, 
+            p.sc_no, 
+            p.qty, 
+            u.unit, 
+            p.rate, 
+            p.currency, 
+            p.ex_rate, 
+            p.charges, 
+            p.charges_amount, 
+            p.gross, 
+            p.gross_usd 
+        FROM `tabProduct CIF` p 
+        LEFT JOIN `tabUnit` u ON p.unit = u.name 
+        LEFT JOIN `tabProduct` pro ON p.product = pro.name 
+        LEFT JOIN `tabProduct Group` pg ON pro.product_group = pg.name 
+        {condition}
+    """.format(condition=conditional_format), values, as_dict=1)
+
+    return data
+
+
 
 def execute(filters=None):
     filters = filters or {}
@@ -90,78 +123,59 @@ def execute(filters=None):
     return columns, data
 
 
-from frappe.utils.formatters import format_value
-
-
-def fmt_money(amount, currency=None):
-    return format_value(amount, {"fieldtype": "Currency", "options": "USD"})
-currency= "usd"
-
-
-
 @frappe.whitelist()
 def get_cif_details(inv_name):
     if not inv_name:
         return "Invalid Invoice Number"
 
     doc = get_cif_data(inv_name)[0]
-    
-    # Get product child table entries
-    products = frappe.get_all(
-        "Product CIF",
-        filters={"parent": inv_name},
-        fields=["product", "qty", 'unit', "rate", "Currency", "ex_rate", "charges", "charges_amount", "round_off"]
-    )
-
-    customer = doc.customer#frappe.get_value("Customer", doc.customer, "code")
-    notify = doc.notify# frappe.get_value("Notify", doc.notify, "code")
-    bank = doc.bank# frappe.get_value("Bank", doc.bank, "bank")
-    category = doc.category# frappe.get_value("Product Category", doc.category, "product_category")
-    company = doc.company#frappe.get_value("Company", doc.accounting_company, "company_code")
-
-    total_received = frappe.db.get_value("Doc Received", {"inv_no": inv_name}, "SUM(received)") or 0
-    total_received = flt(total_received)
-
-    if doc.payment_term == "TT":
-        status = ""
-    elif total_received == 0:
-        status = "Unpaid"
-    elif total_received >= flt(doc.document):
-        status = "Paid"
-    else:
-        status = "Part"
-
+    products= get_cif_product_data(inv_name)
+    exp = frappe.db.sql("""
+        SELECT 
+            parent, 
+            expenses,
+            SUM(amount_usd) AS total_amount 
+        FROM `tabExpenses CIF`
+        WHERE parent = %s
+        GROUP BY expenses, parent
+    """, (inv_name,), as_dict=1)
+        
     # Build product table HTML
     product_table_rows = ""
     for p in products:
         product_table_rows += f"""
             <tr>
+                <td>{p.product_group}</td>
                 <td>{p.product}</td>
+                <td>{p.sc_no}</td>
+                <td>{p.unit}</td>
                 <td style="text-align: right;">{p.qty}</td>
                 <td style="text-align: right;">{p.rate}</td>
-                <td>{p.Currency}</td>
-                <td style="text-align: right;">{p.ex_rate}</td>
-                <td>{p.charges}</td>
                 <td style="text-align: right;">{p.charges_amount}</td>
-                <td style="text-align: right;">{p.round_off}</td>
-                <td style="text-align: right;">{p.unit}</td>
+                <td style="text-align: right;">{p.gross}</td>
+                <td>{p.currency}</td>
+                <td style="text-align: right;">{p.ex_rate}</td>
+                <td style="text-align: right;">{p.gross_usd}</td>
             </tr>
         """
-
+ 
     product_table_html = f"""
     <h4>Product Details</h4>
     <table style="width: 100%; border-collapse: collapse;" border="1" cellpadding="5">
         <thead style="background-color: #f0f0f0;">
             <tr>
-                <th>Product</th>
-                <th style="text-align: right;">Qty</th>
+                <th>Product Group</th>
+                <th>Product Group</th>
+                <th>SC No</th>
+                <th>Unit</th>
+                <th>Qty</th>
                 <th style="text-align: right;">Rate</th>
-                <th>Currency</th>
+                <th style="text-align: right;">Chrgs</th>
+                <th>Gross</th>
+                <th>Curr</th>
                 <th style="text-align: right;">Ex. Rate</th>
-                <th>Charges</th>
-                <th style="text-align: right;">Charges Amt</th>
-                <th style="text-align: right;">Round Off</th>
-                <th style="text-align: right;">Unit</th>
+                <th style="text-align: right;">Gross (USD)</th>
+            
             </tr>
         </thead>
         <tbody>
@@ -169,8 +183,20 @@ def get_cif_details(inv_name):
         </tbody>
     </table>
     """
+    if (exp):
+        exp_row_html=""
+        for ex in exp:
+          exp_row_html +=f"""<tr>
+                    <td> {ex.expenses}</td>
+                    <td>{ex.total_amount}</td>
+                </tr>"""
 
-    currency = products[0]["Currency"] if products else "USD"
+    exp_html=""
+    if (exp):
+        exp_html +=f"""
+        <table style="width: 100%; border-collapse: collapse;">
+           {exp_row_html}
+        </table>"""
 
     # Final HTML output
     html = f"""
@@ -179,19 +205,15 @@ def get_cif_details(inv_name):
 
         <table style="width: 100%; border-collapse: collapse;">
             <tr>
-                <td><b>Invoice No.:</b> {doc.inv_no}</td>
-                <td><b>Invoice Date:</b> {formatdate(doc.inv_date)}</td>
+                <td><b>Inv No.:</b> {doc.inv_no}</td>
+                <td><b>Inv Date:</b> {formatdate(doc.inv_date)}</td>
                 <td><b>Supplier:</b> {doc.supplier}</td>
             </tr>
             <tr>
-                <td><b>Category:</b> {category}</td>
-                <td><b>Company:</b> {company}</td>
-                <td><b>Currency:</b> {currency}</td>
-            </tr>
-            <tr>
-                <td><b>Notify:</b> {notify}</td>
-                <td><b>Bank:</b> {bank}</td>
-                <td><b>Sales:</b> {doc.sales}</td>
+                <td><b>Category:</b> {doc.product_category}</td>
+                <td><b>Notify:</b> {doc.notify}</td>
+                <td><b>Notify:</b> {doc.customer}</td>
+                
             </tr>
         </table>
         <br><hr><br>
@@ -199,24 +221,18 @@ def get_cif_details(inv_name):
         {product_table_html}
 
         <br><hr><br>
-    
+        {exp_html}
 
         <table style="width: 100%;">
             <tr>
-                <td><b>Document Amount:</b> {fmt_money(doc.document, currency=currency)}</td>
-                <td><b>CC:</b> {fmt_money(doc.cc, currency=currency)}</td>
+                
             </tr>
             <tr>
                 <td><b>Payment Term:</b> {doc.payment_term}{' - ' + str(doc.term_days) + ' Days' if doc.payment_term in ['LC', 'DA'] else ''}</td>
                 <td><b>Due Date:</b> {formatdate(doc.due_date)}</td>
             </tr>
-            <tr>
-                <td><b>Total Received:</b> {fmt_money(total_received, currency=currency)}</td>
-                <td><b>Status:</b> <strong>{status}</strong></td>
-            </tr>
+         
         </table>
-
-        
 
         <br><br>
         <p style="font-size: 11px; color: #888;">Generated on: {frappe.utils.nowdate()}</p>
