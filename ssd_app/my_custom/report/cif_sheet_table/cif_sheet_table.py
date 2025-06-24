@@ -19,6 +19,10 @@ def get_cif_data(inv_name=None):
     cat.product_category,
     cus.code AS customer,
     noti.code AS notify,
+    cif.insurance,
+    cif.gross_sales,
+    cif.handling_pct,
+    cif.handling_charges,
     cif.sales,
     cif.document,
     cif.cc,
@@ -30,8 +34,9 @@ def get_cif_data(inv_name=None):
     IF(cif.payment_term IN ('LC', 'DA'),
        CONCAT(cif.payment_term, '- ', cif.term_days),
        cif.payment_term) AS p_term,
+    cif.from_date,
     cif.due_date,
-
+    cif.bank_ref_no,
     CASE
         WHEN cif.payment_term = 'TT' THEN ''
         WHEN COALESCE(t_rec.total_rec, 0) = 0 THEN 'Unpaid'
@@ -118,7 +123,6 @@ def execute(filters=None):
         {"label": "P Term", "fieldname": "p_term", "fieldtype": "Data", "width": 80},
         {"label": "Supplier", "fieldname": "supplier", "fieldtype": "Data", "width": 180},
     ]
-
     data = get_cif_data()
     return columns, data
 
@@ -130,6 +134,7 @@ def get_cif_details(inv_name):
 
     doc = get_cif_data(inv_name)[0]
     products= get_cif_product_data(inv_name)
+    products = sorted(products, key=lambda x: x['product_group'])
     exp = frappe.db.sql("""
         SELECT 
             parent, 
@@ -142,30 +147,56 @@ def get_cif_details(inv_name):
         
     # Build product table HTML
     product_table_rows = ""
+    total_qty=0
+    total_charges_amount=0
+    total_gross=0
+    total_gross_usd= 0
+    prev_product_group=""
     for p in products:
+        total_qty+=p.qty
+        total_charges_amount+=p.charges_amount
+        total_gross+=p.gross
+        total_gross_usd+=p.gross_usd
+        if (prev_product_group != p.product_group ):
+            product_table_rows += f"""<td style="text-align: left;" colspan="10"><b>{p.product_group}</b></td>"""
+        prev_product_group = p.product_group
         product_table_rows += f"""
-            <tr>
-                <td>{p.product_group}</td>
-                <td>{p.product}</td>
-                <td>{p.sc_no}</td>
-                <td>{p.unit}</td>
-                <td style="text-align: right;">{p.qty}</td>
-                <td style="text-align: right;">{p.rate}</td>
-                <td style="text-align: right;">{p.charges_amount}</td>
-                <td style="text-align: right;">{p.gross}</td>
-                <td>{p.currency}</td>
-                <td style="text-align: right;">{p.ex_rate}</td>
-                <td style="text-align: right;">{p.gross_usd}</td>
+           <tr>
+            <td>{p.product}</td>
+            <td>{p.sc_no}</td>
+            <td>{p.unit}</td>
+            <td style="text-align: right;">{p.qty:,.2f}</td>
+            <td style="text-align: right;">{p.rate:,.2f}</td>
+            <td style="text-align: right;">{p.charges_amount:,.2f}</td>
+            <td style="text-align: right;">{p.gross:,.2f}</td>
+            <td>{p.currency}</td>
+            <td style="text-align: right;">{p.ex_rate:,.2f}</td>
+            <td style="text-align: right;">{p.gross_usd:,.2f}</td>
+        </tr>
+            """
+    if(len( products)>1):
+        product_table_rows += f"""
+            <tr style="font-weight: bold;">
+                <td style="text-align: center;" colspan="3">Total</td>
+                <td style="text-align: right;">{total_qty:,.2f}</td>
+                <td style="text-align: right;"></td>
+                <td style="text-align: right;">{total_charges_amount:,.2f}</td>
+                <td style="text-align: right;">{total_gross:,.2f}</td>
+                <td></td>
+                <td style="text-align: right;"></td>
+                <td style="text-align: right;">{total_gross_usd:,.2f}</td>
             </tr>
-        """
+                    """
+        
+
  
     product_table_html = f"""
     <h4>Product Details</h4>
     <table style="width: 100%; border-collapse: collapse;" border="1" cellpadding="5">
         <thead style="background-color: #f0f0f0;">
             <tr>
-                <th>Product Group</th>
-                <th>Product Group</th>
+        
+                <th>Product</th>
                 <th>SC No</th>
                 <th>Unit</th>
                 <th>Qty</th>
@@ -183,20 +214,39 @@ def get_cif_details(inv_name):
         </tbody>
     </table>
     """
-    if (exp):
-        exp_row_html=""
-        for ex in exp:
-          exp_row_html +=f"""<tr>
-                    <td> {ex.expenses}</td>
-                    <td>{ex.total_amount}</td>
-                </tr>"""
+    exp_dict = {i.expenses: i.total_amount for i in exp}
+    exp_row_html=""
+    for exp_row in ["Freight", "Local Exp", "Inland Charges", "Switch B/L Charges", "Others"]:
+        exp_row_html +=f"""<tr>
+                <td> {exp_row}</td>
+                <td style="text-align: right;">{exp_dict.get(exp_row, 0):,.2f}</td>
+            </tr>"""
 
-    exp_html=""
-    if (exp):
-        exp_html +=f"""
-        <table style="width: 100%; border-collapse: collapse;">
-           {exp_row_html}
-        </table>"""
+    handling_html=""
+    if (doc.handling_charges):
+        handling_html+=f"""
+        <tr>
+            <td> Handling ({doc.handling_pct} %)</td>
+            <td style="text-align: right;">{doc.handling_charges:,.2f}</td>
+        </tr>
+        """
+    exp_html =f"""
+    <table style="width: 60%; border-collapse: collapse;">
+        <tr  style="font-size:14px;" >
+            <th><u> Head </u></th>
+            <th style="text-align: right;"><u>Amount</u></th>
+        </tr>
+        <tr>
+            <td> Gross Sales</td>
+            <td style="text-align: right;">{doc.gross_sales:,.2f}</td>
+        </tr>
+        {exp_row_html}
+        <tr>
+            <td> Insurance</td>
+            <td style="text-align: right;">{doc.insurance:,.2f}</td>
+        </tr>
+        {handling_html}
+    </table>"""
 
     # Final HTML output
     html = f"""
@@ -216,22 +266,49 @@ def get_cif_details(inv_name):
                 
             </tr>
         </table>
-        <br><hr><br>
+        <hr>
 
         {product_table_html}
 
-        <br><hr><br>
+        <br><hr>
         {exp_html}
+        <hr>
 
+        <table style="width: 60%; border-collapse: collapse;">
+            <tr  style="font-size:12px;" >
+                <th> Sales </th>
+                <th style="text-align: right;">{doc.sales:,.2f}</th>
+            </tr>
+            <tr>
+                <td> Document</td>
+                <td style="text-align: right;">{doc.document:,.2f}</td>
+            </tr>
+            <tr>
+                <td> CC</td>
+                <td style="text-align: right;">{doc.cc:,.2f}</td>
+            </tr>
+        </table>
+         <hr>
+        
         <table style="width: 100%;">
             <tr>
-                
-            </tr>
-            <tr>
-                <td><b>Payment Term:</b> {doc.payment_term}{' - ' + str(doc.term_days) + ' Days' if doc.payment_term in ['LC', 'DA'] else ''}</td>
+                <td><b>Payment Term:</b> {doc.p_term}{' - ' + str(doc.term_days) + ' Days' if doc.payment_term in ['LC', 'DA'] else ''}</td>
+                <td><b>From Date:</b> {formatdate(doc.from_date)}</td>
                 <td><b>Due Date:</b> {formatdate(doc.due_date)}</td>
             </tr>
-         
+            <tr>
+                <td><b>Bank:</b> {doc.bank}</td>
+                <td><b>Bank Ref No.:</b> {doc.bank_ref_no}</td>    
+            </tr>
+        </table>
+        <hr>
+        <table style="width: 100%;">
+            <tr>
+                <td><b>From Country:</b> *********</td>
+                <td><b>Load Port:</b> ***********</td>
+                <td><b>To Country:</b> ****</td>
+                <td><b>Port of Discharge:</b> *******</td>
+            </tr>
         </table>
 
         <br><br>
@@ -239,8 +316,6 @@ def get_cif_details(inv_name):
     </div>
     """
     return html
-
-
 
 
 @frappe.whitelist()

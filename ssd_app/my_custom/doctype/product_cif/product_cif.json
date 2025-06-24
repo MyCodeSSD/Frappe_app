@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "cidp-.####",
+ "autoname": "cif_p-.####",
  "creation": "2025-06-03 17:42:49.884122",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -130,7 +130,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-06-12 10:31:13.835548",
+ "modified": "2025-06-24 09:35:24.036812",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "Product CIF",

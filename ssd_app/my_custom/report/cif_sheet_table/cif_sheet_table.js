@@ -61,7 +61,7 @@ function showCIFDetails(inv_name) {
                         {
                             fieldtype: 'HTML',
                             fieldname: 'details_html',
-                            options: `<div id="cif-details-a4" style="width: 20cm; min-height: 29.7cm; padding: 1.5cm; background: white; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2);">${r.message}</div>`
+                            options: `<div id="cif-details-a4" style="width: 20cm; min-height: 29.7cm; padding: 0.5cm; background: white; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2);">${r.message}</div>`
                         }
                     ]
                 });
