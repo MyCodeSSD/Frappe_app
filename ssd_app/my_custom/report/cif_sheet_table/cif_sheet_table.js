@@ -33,7 +33,7 @@ frappe.query_reports["CIF Sheet Table"] = {
 
         // 🔗 Clickable inv_no with modal
         if (column.fieldname === "inv_no" && data && data.name) {
-            return `<a href="#" onclick="showCIFDetails('${data.name}'); return false;">${data.inv_no}</a>`;
+            return `<a href="#" onclick="showCIFDetails('${data.name}', '${data.inv_no}'); return false;">${data.inv_no}</a>`;
         }
 
         return value;
@@ -44,24 +44,24 @@ frappe.query_reports["CIF Sheet Table"] = {
 
 
 
-function showCIFDetails(inv_name) {
+function showCIFDetails(inv_name, inv_no) {
     frappe.call({
         method: "ssd_app.my_custom.report.cif_sheet_table.cif_sheet_table.get_cif_details",
         args: { inv_name },
         callback: function (r) {
             if (r.message) {
                 let dialog = new frappe.ui.Dialog({
-                    title: 'CIF Details: ' + inv_name,
+                    title: 'CIF Sheet: ' + inv_no,
                     size: 'large',
                     primary_action_label: 'PDF',
                     primary_action: () => {
-                        window.open(`/api/method/ssd_app.my_custom.report.cif_sheet_table.cif_sheet_table.download_cif_pdf?inv_name=${inv_name}`, '_blank');
+                        window.open(`/api/method/ssd_app.my_custom.report.cif_sheet_table.cif_sheet_table.get_cif_details?inv_name=${inv_name}&pdf=1`, '_blank');
                     },
                     fields: [
                         {
                             fieldtype: 'HTML',
                             fieldname: 'details_html',
-                            options: `<div id="cif-details-a4" style="width: 20cm; min-height: 29.7cm; padding: 0.5cm; background: white; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2);">${r.message}</div>`
+                            options: `<div id="cif-details-a4" style="width: 20cm; max-width:100%; min-height: 28.7cm; padding: 0.5cm; background: white; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2);">${r.message}</div>`
                         }
                     ]
                 });

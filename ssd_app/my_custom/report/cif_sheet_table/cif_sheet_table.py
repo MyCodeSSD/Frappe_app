@@ -26,6 +26,11 @@ def get_cif_data(inv_name=None):
     cif.sales,
     cif.document,
     cif.cc,
+    l_port.port AS load_port,
+    d_port.port AS destination_port,
+    l_port.country AS from_country,
+    city.country AS to_country,
+                    
     CASE
     WHEN cost.inv_no IS NULL THEN ''
     ELSE COALESCE(sup.supplier, '--Multi--')
@@ -51,6 +56,9 @@ def get_cif_data(inv_name=None):
     LEFT JOIN `tabProduct Category` cat ON cif.category = cat.name
     LEFT JOIN `tabNotify` noti ON cif.notify = noti.name
     LEFT JOIN `tabBank` bank ON cif.bank = bank.name
+    LEFT JOIN `tabPort` l_port ON cif.load_port= l_port.name
+    LEFT JOIN `tabPort` d_port ON cif.destination_port= d_port.name
+    LEFT JOIN `tabCity` city ON noti.city=city.name
 
     LEFT JOIN (
         SELECT inv_no, MIN(supplier) AS supplier
@@ -127,8 +135,9 @@ def execute(filters=None):
     return columns, data
 
 
+
 @frappe.whitelist()
-def get_cif_details(inv_name):
+def get_cif_details(inv_name, pdf=0):
     if not inv_name:
         return "Invalid Invoice Number"
 
@@ -191,11 +200,10 @@ def get_cif_details(inv_name):
 
  
     product_table_html = f"""
-    <h4>Product Details</h4>
+    <h3>Product Details</h3>
     <table style="width: 100%; border-collapse: collapse;" border="1" cellpadding="5">
         <thead style="background-color: #f0f0f0;">
             <tr>
-        
                 <th>Product</th>
                 <th>SC No</th>
                 <th>Unit</th>
@@ -206,7 +214,6 @@ def get_cif_details(inv_name):
                 <th>Curr</th>
                 <th style="text-align: right;">Ex. Rate</th>
                 <th style="text-align: right;">Gross (USD)</th>
-            
             </tr>
         </thead>
         <tbody>
@@ -232,13 +239,13 @@ def get_cif_details(inv_name):
         """
     exp_html =f"""
     <table style="width: 60%; border-collapse: collapse;">
-        <tr  style="font-size:14px;" >
-            <th><u> Head </u></th>
-            <th style="text-align: right;"><u>Amount</u></th>
+        <tr  style="font-size:16px;" >
+            <td><u> Head </u></td>
+            <td style="text-align: right;"><u>Amount</u></td>
         </tr>
         <tr>
-            <td> Gross Sales</td>
-            <td style="text-align: right;">{doc.gross_sales:,.2f}</td>
+            <td><b> Gross Sales </b></td>
+            <td style="text-align: right;"><b>{doc.gross_sales:,.2f}</b></td>
         </tr>
         {exp_row_html}
         <tr>
@@ -251,7 +258,8 @@ def get_cif_details(inv_name):
     # Final HTML output
     html = f"""
     <div style="font-family: Arial; font-size: 12px; padding: 10px; ">
-        <h3 style="text-align: center; margin-bottom: 10px;">CIF Sheet</h3>
+        <h2 style="text-align: center; margin-bottom: 10px;">CIF Sheet</h2>
+        <hr>
 
         <table style="width: 100%; border-collapse: collapse;">
             <tr>
@@ -275,9 +283,9 @@ def get_cif_details(inv_name):
         <hr>
 
         <table style="width: 60%; border-collapse: collapse;">
-            <tr  style="font-size:12px;" >
-                <th> Sales </th>
-                <th style="text-align: right;">{doc.sales:,.2f}</th>
+            <tr>
+                <td> Sales </td>
+                <td style="text-align: right;">{doc.sales:,.2f}</td>
             </tr>
             <tr>
                 <td> Document</td>
@@ -304,10 +312,12 @@ def get_cif_details(inv_name):
         <hr>
         <table style="width: 100%;">
             <tr>
-                <td><b>From Country:</b> *********</td>
-                <td><b>Load Port:</b> ***********</td>
-                <td><b>To Country:</b> ****</td>
-                <td><b>Port of Discharge:</b> *******</td>
+                <td><b>From Country:</b>{doc.from_country}</td>
+                <td><b>To Country:</b>{doc.to_country}</td>
+            </tr>
+            <tr>
+                <td><b>Port of Loading:</b> {doc.load_port}</td>
+                <td><b>Port of Discharge:</b>{doc.destination_port}</td>
             </tr>
         </table>
 
@@ -315,44 +325,13 @@ def get_cif_details(inv_name):
         <p style="font-size: 11px; color: #888;">Generated on: {frappe.utils.nowdate()}</p>
     </div>
     """
-    return html
+    if (pdf):
+        frappe.local.response.filename = f"CIF_{inv_name}.pdf"
+        frappe.local.response.filecontent = get_pdf(html)
+        frappe.local.response.type = "pdf"
 
+    else:
+        return html
 
-@frappe.whitelist()
-def download_cif_pdf(inv_name):
-    if not inv_name:
-        frappe.throw(_("Missing Invoice Number"))
-
-    doc = frappe.get_doc("CIF Sheet", inv_name)
-    
-    customer = frappe.get_value("Customer", doc.customer, "code")
-    notify = frappe.get_value("Notify", doc.notify, "code")
-    bank = frappe.get_value("Bank", doc.bank, "bank")
-    category = frappe.get_value("Product Category", doc.category, "product_category")
-    company = frappe.get_value("Company", doc.accounting_company, "company_code")
-
-    total_received = frappe.db.get_value("Doc Received", {"inv_no": inv_name}, "SUM(received)") or 0
-
-    html = f"""
-    <div style="width: 21cm; min-height: 29.7cm; padding: 1.5cm; font-size: 13px;">
-        <h2>CIF Sheet - Invoice {doc.inv_no}</h2>
-        <p><b>Date:</b> {doc.inv_date}</p>
-        <p><b>Customer:</b> {customer}</p>
-        <p><b>Notify:</b> {notify}</p>
-        <p><b>Category:</b> {category}</p>
-        <p><b>Company:</b> {company}</p>
-        <p><b>Bank:</b> {bank}</p>
-        <p><b>Sales:</b> {doc.sales}</p>
-        <p><b>Document:</b> {doc.document}</p>
-        <p><b>CC:</b> {doc.cc}</p>
-        <p><b>Payment Term:</b> {doc.payment_term}</p>
-        <p><b>Due Date:</b> {doc.due_date}</p>
-        <p><b>Total Received:</b> {total_received}</p>
-    </div>
-    """
-
-    frappe.local.response.filename = f"CIF_{inv_name}.pdf"
-    frappe.local.response.filecontent = get_pdf(html)
-    frappe.local.response.type = "pdf"
 
 
