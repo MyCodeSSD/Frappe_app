@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "cost-.####",
  "creation": "2025-06-09 09:33:25.556621",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -347,7 +348,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-13 15:21:51.673787",
+ "modified": "2025-06-25 10:06:42.045309",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "Cost Sheet",

@@ -2,6 +2,7 @@
  "actions": [],
  "autoname": "cif-.####",
  "creation": "2025-06-03 17:38:34.042582",
+ "default_view": "Report",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -385,7 +386,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-22 21:49:27.289859",
+ "modified": "2025-06-25 10:42:58.566722",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "CIF Sheet",

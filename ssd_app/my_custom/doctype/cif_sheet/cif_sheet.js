@@ -166,12 +166,45 @@ function toggle_expense_section(frm) {
 }
 
 
+function custom_print(frm){
+    frm.add_custom_button("Custom Print", function() {
+            frappe.call({
+                method: "ssd_app.my_custom.report.cif_sheet_table.cif_sheet_table.get_cif_details",
+                args: {
+                inv_name: frm.doc.name
+                },
+                callback: function(r) {
+                    if (r.message) {
+                        let dialog = new frappe.ui.Dialog({
+                            title: 'CIF Sheet: ' + frm.doc.inv_no,
+                            size: 'large',
+                            primary_action_label: 'PDF',
+                            primary_action: () => {
+                                window.open(`/api/method/ssd_app.my_custom.report.cif_sheet_table.cif_sheet_table.get_cif_details?inv_name=${frm.doc.name}&pdf=1`, '_blank');
+                            },
+                            fields: [
+                                {
+                                    fieldtype: 'HTML',
+                                    fieldname: 'details_html',
+                                    options: `<div id="cif-details-a4" style="width: 20cm; max-width:100%; min-height: 28.7cm; padding: 0.3cm; background: white; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2);">${r.message}</div>`
+                                }
+                            ]
+                        });
+                        dialog.show();
+
+                    } 
+                }
+            });
+        });
+}
+
 // ------------------------------------------------------- Main DocType ------------------------------------------------------
 
 frappe.ui.form.on("CIF Sheet", {
     refresh(frm) {
         toggle_sc_no_field(frm);
         toggle_category_readonly(frm);
+        custom_print(frm);
     },
     onload(frm) {
         set_product_query_filter(frm);
@@ -215,6 +248,11 @@ frappe.ui.form.on("CIF Sheet", {
         lock_bank_in_tt(frm);
         lock_term_days(frm);
         calculate_due_date(frm);
+    },
+    after_save(frm) {
+        showCIFDetails(frm.doc.name, frm.doc.inv_no);
+        console.log("save");
+        frappe.msgprint("✅ CIF Sheet saved! INV: " + frm.doc.inv_no);
     },
     insurance_pct: calculate_and_refresh,
     insurance_based_on: calculate_and_refresh,
@@ -318,7 +356,6 @@ frappe.ui.form.on("Product CIF", {
             await check_category(frm, row);
         }
     },
-
     // Bind other triggers
     rate: update_all,
     qty: update_all,
@@ -353,6 +390,51 @@ function update_exp_and_totals(frm, cdt, cdn) {
     calculate_exp(cdt, cdn);
     calculate_sales(frm);
     calculate_cc(frm);
+}
+
+
+
+function showCIFDetails(inv_name, inv_no) {
+    frappe.call({
+        method: "ssd_app.my_custom.doctype.cif_sheet.cif_sheet.render_cif_sheet_pdf",
+        args: { inv_name },
+        callback: function (r) {
+            if (!r.message) return;
+
+            const htmlContent = `
+                <div id="cif-details-a4" style="
+                    width: 20cm;
+                    max-width: 100%;
+                    min-height: 28.7cm;
+                    padding: 0.3cm;
+                    background: white;
+                    font-size: 13px;
+                    box-shadow: 0 0 8px rgba(0,0,0,0.2);"
+                >${r.message}</div>
+            `;
+
+            const dialog = new frappe.ui.Dialog({
+                title: `CIF Sheet: ${inv_no}`,
+                size: 'large',
+                primary_action_label: 'PDF',
+                primary_action() {
+                    window.open(
+                        `/api/method/ssd_app.my_custom.doctype.cif_sheet.cif_sheet.render_cif_sheet_pdf?inv_name=${inv_name}&pdf=1`,
+                        '_blank'
+                    );
+                },
+                fields: [
+                    {
+                        fieldtype: 'HTML',
+                        fieldname: 'details_html',
+                        options: htmlContent
+                    }
+                ]
+            });
+
+            dialog.show();
+        }
+    });
 }
 
 
