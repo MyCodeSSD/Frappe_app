@@ -1,5 +1,139 @@
-<h3>CIF Invoice</h3>
-<p><strong>Invoice No:</strong> {{ doc.name }}</p>
-<p><strong>Customer:</strong> {{ doc.customer }}</p>
-<p><strong>Date:</strong> {{ formatted_date }}</p>
-<p>{{ custom_message }}</p>
+ <div style="font-family: Arial; font-size: 12px; padding: 10px; ">
+        <h2 style="text-align: center; margin-bottom: 10px;">CIF Sheet</h2>
+        <hr>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td><b>Inv No.:</b> {{doc.inv_no}}</td>
+                <td><b>Inv Date:</b> {{doc.inv_date}}</td>
+                <td><b>Supplier:</b>**********</td>
+            </tr>
+            <tr>
+                <td><b>Category:</b> {{doc.category}}</td>
+                <td><b>Notify:</b> {{doc.notify}}</td>
+                <td><b>Notify:</b> {{doc.customer}}</td>
+            </tr>
+        </table>
+        <hr>
+
+        <h3>Product Details</h3>
+    <table style="width: 100%; border-collapse: collapse;" border="1" cellpadding="5">
+        <thead style="background-color: #d9d9d9;">
+            <tr>
+                <th>Product</th>
+                <th>SC No</th>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th style="text-align: right;">Rate</th>
+                <th style="text-align: right;">Chrgs</th>
+                <th>Gross</th>
+                <th>Curr</th>
+                <th style="text-align: right;">Ex. Rate</th>
+                <th style="text-align: right;">Gross (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set ns = namespace(prev_group=None) %}
+            {% for p in product %}
+                {% if ns.prev_group != p.product_group %}
+                <tr>
+                    <td colspan="10" style="font-weight: bold; background-color: #f0f0f0;">
+                    {{ p.product_group }}
+                    </td>
+                </tr>
+                {% endif %}
+
+                <tr>
+                <td>{{ p.product }}</td>
+                <td>{{ p.sc_no }}</td>
+                <td style="text-align: right;">{{ "{:,.2f}".format(p.qty) }}</td>
+                <td>{{ p.unit }}</td>
+                <td style="text-align: right;">{{"{:,.2f}".format(p.rate)}}</td>
+                <td style="text-align: right;">{{ "{:,.2f}".format(p.charges_amount) }}</td>
+                <td style="text-align: right;">{{"{:,.2f}".format( p.gross) }}</td>
+                <td>{{ p.currency }}</td>
+                <td style="text-align: right;">{{ "{:,.2f}".format(p.ex_rate) }}</td>
+                <td style="text-align: right;">{{ "{:,.2f}".format(p.gross_usd) }}</td>
+                </tr>
+
+                {% set ns.prev_group = p.product_group %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+        <br><hr>
+        <table style="width: 60%; border-collapse: collapse;">
+            <tr  style="font-size:16px;" >
+                <td><u> Head </u></td>
+                <td style="text-align: right;"><u>Amount</u></td>
+            </tr>
+            <tr>
+                <td><b> Gross Sales </b></td>
+                <td style="text-align: right;"><b>{{"{:,.2f}".format(doc.gross_sales)}}</b></td>
+            </tr>
+            {% for label, amount in expenses.items() %}
+            <tr>
+                <td>{{ label }}</td>
+                <td style="text-align: right;">{{"{:,.2f}".format(amount) }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td> Insurance</td>
+                <td style="text-align: right;">{{"{:,.2f}".format(doc.insurance)}}</td>
+            </tr>
+        {handling_html}
+        </table>
+
+        <hr>
+
+        <table style="width: 60%; border-collapse: collapse;">
+            <tr>
+                <td> Sales </td>
+                <td style="text-align: right;">{{"{:,.2f}".format(doc.sales)}}</td>
+            </tr>
+            <tr>
+                <td> Document</td>
+                <td style="text-align: right;">{{"{:,.2f}".format(doc.document)}}</td>
+            </tr>
+            <tr>
+                <td> CC</td>
+                <td style="text-align: right;">{{"{:,.2f}".format(doc.cc)}}</td>
+            </tr>
+        </table>
+         <hr>
+        
+        <table style="width: 100%;">
+            <tr>
+                <td>
+                    <b>Payment Term:</b> {{ doc.payment_term }}
+                    {% if doc.payment_term in ['LC', 'DA'] %}
+                        - {{ doc.term_days }}
+                    {% endif %}
+                    </td>
+                <td><b>From Date:</b> {{doc.from_date}}</td>
+                <td><b>Due Date:</b> {{doc.due_date}}</td>
+            </tr>
+            <tr>
+                <td><b>Bank:</b> {{doc.bank}}</td>
+                <td><b>Bank Ref No.:</b> {{doc.bank_ref_no}}</td>    
+            </tr>
+        </table>
+        <hr>
+        <table style="width: 100%;">
+            <tr>
+                <td><b>From Country:</b>******</td>
+                <td><b>To Country:</b>********</td>
+            </tr>
+            <tr>
+                <td><b>Port of Loading:</b> {{doc.load_port}}</td>
+                <td><b>Port of Discharge:</b>{{doc.destination_port}}</td>
+            </tr>
+        </table>
+
+        <br><br>
+        <p style="font-size: 11px; color: #888;">Generated on: {{generated_date}}</p>
+    </div>
+   
+
+
+

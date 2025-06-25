@@ -251,8 +251,6 @@ frappe.ui.form.on("CIF Sheet", {
     },
     after_save(frm) {
         showCIFDetails(frm.doc.name, frm.doc.inv_no);
-        console.log("save");
-        frappe.msgprint("✅ CIF Sheet saved! INV: " + frm.doc.inv_no);
     },
     insurance_pct: calculate_and_refresh,
     insurance_based_on: calculate_and_refresh,
