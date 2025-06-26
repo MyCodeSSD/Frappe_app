@@ -60,7 +60,6 @@ function get_cif_data(frm) {
 // 🧠 Function to update CIF Sheet if bank was missing
 function put_bank_in_cif(frm) {
     if (!frm.doc.bank || !frm.doc.inv_no) return;
-
     frappe.call({
         method: "ssd_app.my_custom.doctype.doc_nego.doc_nego.update_cif_bank_if_missing",
         args: {

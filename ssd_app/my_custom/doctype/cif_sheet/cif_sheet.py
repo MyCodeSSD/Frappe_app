@@ -13,6 +13,16 @@ class CIFSheet(Document):
 @frappe.whitelist()
 def render_cif_sheet_pdf(inv_name, pdf=0):
     doc = frappe.get_doc("CIF Sheet", inv_name)
+    doc.customer_name=frappe.db.get_value("Customer", doc.customer, "customer")
+    doc.notify_name=frappe.db.get_value("Notify", doc.notify, "notify")
+    doc.acc_com_name = frappe.db.get_value("Company", doc.accounting_company, "company_code")
+    doc.category_name=frappe.db.get_value("Product Category", doc.category, "product_category")
+    doc.bank_name=frappe.db.get_value("Bank", doc.bank, "bank")
+    doc.load_port_name=frappe.db.get_value("Port", doc.load_port, "port")
+    doc.f_country_name=frappe.db.get_value("Port", doc.load_port, "country")
+    doc.notify_city=frappe.db.get_value("Notify", doc.notify, "city")
+    doc.t_country_name=frappe.db.get_value("City", doc.notify_city, "country")
+    doc.destination_port_name=frappe.db.get_value("Port", doc.destination_port, "port")
     product =  frappe.db.sql("""
         SELECT p.parent, pg.product_group, pro.product, p.sc_no, p.qty, u.unit, p.rate, p.currency, p.ex_rate, 
             p.charges, p.charges_amount, p.gross, p.gross_usd 

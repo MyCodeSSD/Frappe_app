@@ -398,7 +398,6 @@ function showCIFDetails(inv_name, inv_no) {
         args: { inv_name },
         callback: function (r) {
             if (!r.message) return;
-
             const htmlContent = `
                 <div id="cif-details-a4" style="
                     width: 20cm;

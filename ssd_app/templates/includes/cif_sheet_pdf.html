@@ -6,12 +6,12 @@
             <tr>
                 <td><b>Inv No.:</b> {{doc.inv_no}}</td>
                 <td><b>Inv Date:</b> {{doc.inv_date}}</td>
-                <td><b>Supplier:</b>**********</td>
+                <td><b>Company:</b>{{doc.acc_com_name}}</td>
             </tr>
             <tr>
-                <td><b>Category:</b> {{doc.category}}</td>
-                <td><b>Notify:</b> {{doc.notify}}</td>
-                <td><b>Notify:</b> {{doc.customer}}</td>
+                <td><b>Category:</b> {{doc.category_name}}</td>
+                <td><b>Notify:</b> {{doc.notify_name}}</td>
+                <td><b>Customer:</b> {{doc.customer_name}}</td>
             </tr>
         </table>
         <hr>
@@ -33,31 +33,54 @@
             </tr>
         </thead>
         <tbody>
-            {% set ns = namespace(prev_group=None) %}
+            {% set ns = namespace(
+                prev_group=None,
+                total_qty=0,
+                total_charges_amount=0,
+                total_gross=0,
+                total_gross_usd=0
+            ) %}
             {% for p in product %}
+                {% set ns.total_qty = ns.total_qty + p.qty %}
+                {% set ns.total_charges_amount = ns.total_charges_amount + p.charges_amount %}
+                {% set ns.total_gross = ns.total_gross + p.gross %}
+                {% set ns.total_gross_usd = ns.total_gross_usd + p.gross_usd %}
                 {% if ns.prev_group != p.product_group %}
-                <tr>
-                    <td colspan="10" style="font-weight: bold; background-color: #f0f0f0;">
-                    {{ p.product_group }}
-                    </td>
-                </tr>
-                {% endif %}
+            <tr>
+                <td colspan="10" style="font-weight: bold; background-color: #f0f0f0;">
+                {{ p.product_group }}
+                </td>
+            </tr>
+            {% endif %}
 
-                <tr>
-                <td>{{ p.product }}</td>
-                <td>{{ p.sc_no }}</td>
-                <td style="text-align: right;">{{ "{:,.2f}".format(p.qty) }}</td>
-                <td>{{ p.unit }}</td>
-                <td style="text-align: right;">{{"{:,.2f}".format(p.rate)}}</td>
-                <td style="text-align: right;">{{ "{:,.2f}".format(p.charges_amount) }}</td>
-                <td style="text-align: right;">{{"{:,.2f}".format( p.gross) }}</td>
-                <td>{{ p.currency }}</td>
-                <td style="text-align: right;">{{ "{:,.2f}".format(p.ex_rate) }}</td>
-                <td style="text-align: right;">{{ "{:,.2f}".format(p.gross_usd) }}</td>
-                </tr>
+            <tr>
+            <td>{{ p.product }}</td>
+            <td>{{ p.sc_no }}</td>
+            <td style="text-align: right;">{{ "{:,.2f}".format(p.qty) }}</td>
+            <td>{{ p.unit }}</td>
+            <td style="text-align: right;">{{"{:,.2f}".format(p.rate)}}</td>
+            <td style="text-align: right;">{{ "{:,.2f}".format(p.charges_amount) }}</td>
+            <td style="text-align: right;">{{"{:,.2f}".format( p.gross) }}</td>
+            <td>{{ p.currency }}</td>
+            <td style="text-align: right;">{{ "{:,.2f}".format(p.ex_rate) }}</td>
+            <td style="text-align: right;">{{ "{:,.2f}".format(p.gross_usd) }}</td>
+            </tr>
 
-                {% set ns.prev_group = p.product_group %}
+            {% set ns.prev_group = p.product_group %}
             {% endfor %}
+           {% if products|count != 1 %}
+            <tr style="font-weight: bold;">
+                <td colspan="2" style="text-align: center;">Total</td>
+                <td style="text-align: right;">{{ "{:,.2f}".format(ns.total_qty) }}</td>
+                <td></td>
+                <td></td>
+                <td style="text-align: right;">{{ "{:,.2f}".format(ns.total_charges_amount) }}</td>
+                <td style="text-align: right;">{{ "{:,.2f}".format(ns.total_gross) }}</td>
+                <td></td>
+                <td></td>
+                <td style="text-align: right;">{{ "{:,.2f}".format(ns.total_gross_usd) }}</td>
+            </tr>
+            {% endif %}
         </tbody>
     </table>
 
@@ -81,7 +104,6 @@
                 <td> Insurance</td>
                 <td style="text-align: right;">{{"{:,.2f}".format(doc.insurance)}}</td>
             </tr>
-        {handling_html}
         </table>
 
         <hr>
@@ -114,24 +136,26 @@
                 <td><b>Due Date:</b> {{doc.due_date}}</td>
             </tr>
             <tr>
-                <td><b>Bank:</b> {{doc.bank}}</td>
+                <td><b>Bank:</b> {{doc.bank_name}}</td>
                 <td><b>Bank Ref No.:</b> {{doc.bank_ref_no}}</td>    
             </tr>
         </table>
         <hr>
         <table style="width: 100%;">
             <tr>
-                <td><b>From Country:</b>******</td>
-                <td><b>To Country:</b>********</td>
+                <td><b>From Country:</b>{{doc.f_country_name}}</td>
+                <td><b>To Country:</b>{{doc.t_country_name}}</td>
             </tr>
             <tr>
-                <td><b>Port of Loading:</b> {{doc.load_port}}</td>
-                <td><b>Port of Discharge:</b>{{doc.destination_port}}</td>
+                <td><b>Port of Loading:</b> {{doc.load_port_name}}</td>
+                <td><b>Port of Discharge:</b>{{doc.destination_port_name}}</td>
             </tr>
         </table>
 
         <br><br>
-        <p style="font-size: 11px; color: #888;">Generated on: {{generated_date}}</p>
+        <p style="font-size: 11px; color: #888; text-align: right; margin: 0;">
+            Generated on: {{ generated_date }}
+        </p>
     </div>
    
 
