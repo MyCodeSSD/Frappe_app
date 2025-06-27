@@ -212,9 +212,11 @@ frappe.ui.form.on("CIF Sheet", {
         calculate_gross_sales(frm);
         calculate_insurance(frm);
         toggle_expense_section(frm);
+        check_and_lock_fields(frm);
     },
 	inv_no(frm) {
         check_unique_inv_no(frm);
+        check_and_lock_fields(frm);
 	},
     inv_date(frm) {
         set_from_date(frm);
@@ -297,8 +299,6 @@ function lock_term_days(frm) {
     }
 }
 
-
-
 // ---------------------- Product Child Table ----------------------
 
 // set default unit
@@ -371,7 +371,6 @@ function update_all(frm, cdt, cdn) {
     calculate_cc(frm);
 }
 
-
 // ---------------------- Expense Child Table: Expenses CIF ----------------------
 
 frappe.ui.form.on("Expenses CIF", {
@@ -389,8 +388,6 @@ function update_exp_and_totals(frm, cdt, cdn) {
     calculate_sales(frm);
     calculate_cc(frm);
 }
-
-
 
 function showCIFDetails(inv_name, inv_no) {
     frappe.call({
@@ -432,6 +429,23 @@ function showCIFDetails(inv_name, inv_no) {
             dialog.show();
         }
     });
-}
+} 
 
+
+function check_and_lock_fields(frm) {
+    if (frm.is_new() || !frm.doc.inv_no) return;
+
+    frappe.call({
+        method: "ssd_app.my_custom.doctype.cif_sheet.cif_sheet.check_related_docs",
+        args: { inv_id: frm.doc.name },
+        callback: function(r) {
+            if (r.message === true) {
+                frm.set_df_property("document", "read_only", 1);
+                frm.set_df_property("bank", "read_only", 1);
+                frm.refresh_field("document");
+                frm.refresh_field("bank");
+            }
+        }
+    });
+}
 

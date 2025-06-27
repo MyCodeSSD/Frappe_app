@@ -32,7 +32,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-03 15:18:20.404042",
+ "modified": "2025-06-27 16:50:39.243503",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "Product Category",
@@ -52,6 +52,7 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
  "row_format": "Dynamic",
  "show_title_field_in_link": 1,
  "sort_field": "modified",

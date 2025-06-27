@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_rename": 1,
  "autoname": "sup-.####",
  "creation": "2025-06-03 16:33:30.252741",
  "doctype": "DocType",
@@ -9,6 +8,7 @@
   "supplier",
   "code",
   "city",
+  "country",
   "address",
   "email",
   "phone_no",
@@ -64,12 +64,19 @@
    "fieldname": "note",
    "fieldtype": "Data",
    "label": "Note"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Country",
+   "options": "Country"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-09 15:15:30.466561",
+ "modified": "2025-06-27 14:33:40.467129",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "Supplier",
@@ -89,10 +96,12 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
  "row_format": "Dynamic",
  "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "supplier"
+ "title_field": "supplier",
+ "track_changes": 1
 }

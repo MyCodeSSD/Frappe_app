@@ -21,8 +21,11 @@ frappe.query_reports["Document Receivable"] = {
             return `<span style="${style}">${value}</span>`;
         }
 
+        if (column.fieldname === "document" && data?.name) {
+            return `<a  href="#" onclick="showDocFlow('${data.name}', '${data.inv_no}'); return false;">${Number(data.document).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</a>`;
+        }
         if (column.fieldname === "inv_no" && data?.name) {
-            return `<a href="#" onclick="showDocFlow('${data.name}', '${data.inv_no}'); return false;">${data.inv_no}</a>`;
+            return `<a  href="#" onclick="showCIFDetails('${data.name}', '${data.inv_no}'); return false;">${data.inv_no})}</a>`;
         }
 
         return value;
@@ -83,3 +86,46 @@ function showDocFlow(inv_name, inv_no) {
         }
     });
 }
+
+
+function showCIFDetails(inv_name, inv_no) {
+    frappe.call({
+        method: "ssd_app.my_custom.doctype.cif_sheet.cif_sheet.render_cif_sheet_pdf",
+        args: { inv_name },
+        callback: function (r) {
+            if (!r.message) return;
+            const htmlContent = `
+                <div id="cif-details-a4" style="
+                    width: 20cm;
+                    max-width: 100%;
+                    min-height: 28.7cm;
+                    padding: 0.3cm;
+                    background: white;
+                    font-size: 13px;
+                    box-shadow: 0 0 8px rgba(0,0,0,0.2);"
+                >${r.message}</div>
+            `;
+
+            const dialog = new frappe.ui.Dialog({
+                title: `CIF Sheet: ${inv_no}`,
+                size: 'large',
+                primary_action_label: 'PDF',
+                primary_action() {
+                    window.open(
+                        `/api/method/ssd_app.my_custom.doctype.cif_sheet.cif_sheet.render_cif_sheet_pdf?inv_name=${inv_name}&pdf=1`,
+                        '_blank'
+                    );
+                },
+                fields: [
+                    {
+                        fieldtype: 'HTML',
+                        fieldname: 'details_html',
+                        options: htmlContent
+                    }
+                ]
+            });
+
+            dialog.show();
+        }
+    });
+} 

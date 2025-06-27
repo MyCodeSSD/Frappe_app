@@ -60,3 +60,9 @@ def render_cif_sheet_pdf(inv_name, pdf=0):
 
     else:
         return html
+    
+@frappe.whitelist()
+def check_related_docs(inv_id):
+    has_received = frappe.db.exists("Doc Received", {"inv_no": inv_id})
+    has_nego = frappe.db.exists("Doc Nego", {"inv_no": inv_id})
+    return bool(has_received or has_nego)

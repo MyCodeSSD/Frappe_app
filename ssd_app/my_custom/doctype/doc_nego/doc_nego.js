@@ -101,12 +101,12 @@ frappe.ui.form.on("Doc Nego", {
 	setup(frm) {
         inv_no_filter(frm);  // ✅ Register custom filter  
     },
-    onload(frm){
+    onload(frm) {
+        if (!frm.is_new()) return;
         get_cif_data(frm);
-        if (frm.is_quick_entry) {
-            if (frm.doc.bank) {
-                frm.set_df_property('bank', 'read_only', 1);
-            }
+
+        if (frm.is_quick_entry && frm.doc.bank) {
+            frm.set_df_property('bank', 'read_only', 1);
         }
     },
     inv_no(frm) {

@@ -12,7 +12,9 @@ def final_validation(doc):
         return
 
     # Fetch CIF document value
-    cif_document = frappe.db.get_value("CIF Sheet", doc.inv_no, "document") or 0
+    cif_data = frappe.db.get_value("CIF Sheet", doc.inv_no, ["document", "inv_date"], as_dict=True)
+    cif_document = cif_data.document or 0
+    inv_date = cif_data.inv_date or ""
 
     # Total received from other Doc Received entries (excluding current one)
     total_received = frappe.db.sql("""
@@ -51,8 +53,6 @@ def final_validation(doc):
             <b>This Entry:</b> {doc.nego_amount:,.2f}
         """))
 
-    # Validate Nego Date
-    inv_date = frappe.db.get_value("CIF Sheet", doc.inv_no, "inv_date") or ""
 
     # convert strings to date if needed
     if isinstance(doc.nego_date, str):
@@ -80,28 +80,17 @@ def update_cif_bank_if_missing(doc):
     else:
         if(doc.bank):
             frappe.db.set_value("CIF Sheet", doc.inv_no, "bank", doc.bank)
-            frappe.db.commit()
+            # frappe.db.commit()
         else:
             frappe.throw('Bank name not put in CIF Sheet, Please input Bank name')
             
 
 def protect_delete(doc):
-    # Total received
-    total_received = frappe.db.sql("""
-        SELECT IFNULL(SUM(received), 0)
-        FROM `tabDoc Received`
-        WHERE inv_no = %s
-    """, (doc.inv_no,))[0][0] or 0
 
-    # Total refund
-    total_ref = frappe.db.sql("""
-        SELECT IFNULL(SUM(refund_amount), 0)
-        FROM `tabDoc Refund`
-        WHERE inv_no = %s
-    """, (doc.inv_no))[0][0] or 0
-
-    if (total_received + total_ref) > 0:
-        frappe.throw("❌ Cannot delete: Related receipts or refunds already exist.")
+    if frappe.db.exists("Doc Received", {"inv_no": doc.inv_no}):
+        frappe.throw("❌ Cannot delete: Doc Already Received part or full")
+    if frappe.db.exists("Doc Refund", {"inv_no": doc.inv_no}):
+        frappe.throw("❌ Cannot delete: Doc Already Refunded")
 
 
 
@@ -126,11 +115,6 @@ class DocNego(Document):
     
     def on_trash(self):
         protect_delete(self)
-
-
-
-    
-
 
 @frappe.whitelist()
 def get_cif_data(inv_no):

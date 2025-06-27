@@ -35,7 +35,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-03 16:20:38.445025",
+ "modified": "2025-06-27 17:26:18.352466",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "Unit",
@@ -55,6 +55,7 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
  "row_format": "Dynamic",
  "show_title_field_in_link": 1,
  "sort_field": "modified",

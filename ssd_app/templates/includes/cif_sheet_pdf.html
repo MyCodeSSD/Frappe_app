@@ -34,6 +34,7 @@
         </thead>
         <tbody>
             {% set ns = namespace(
+                row_count=0,
                 prev_group=None,
                 total_qty=0,
                 total_charges_amount=0,
@@ -41,6 +42,7 @@
                 total_gross_usd=0
             ) %}
             {% for p in product %}
+                {% set ns.row_count = ns.row_count + 1 %}
                 {% set ns.total_qty = ns.total_qty + p.qty %}
                 {% set ns.total_charges_amount = ns.total_charges_amount + p.charges_amount %}
                 {% set ns.total_gross = ns.total_gross + p.gross %}
@@ -68,7 +70,7 @@
 
             {% set ns.prev_group = p.product_group %}
             {% endfor %}
-           {% if products|count != 1 %}
+           {% if  ns.row_count != 1 %}
             <tr style="font-weight: bold;">
                 <td colspan="2" style="text-align: center;">Total</td>
                 <td style="text-align: right;">{{ "{:,.2f}".format(ns.total_qty) }}</td>
