@@ -62,16 +62,74 @@ def final_validation(doc):
         inv_date = datetime.strptime(inv_date, "%Y-%m-%d").date()
 
     if nego_date and inv_date and nego_date < inv_date:
-        frappe.msgprint(
+        frappe.throw(
             _("🛑 <b>Nego Date</b> cannot be before the <b>Invoice Date</b>. Please correct the dates."),
             title=_("Date Validation Error")
         )
         doc.nego_date = None
 
 
+def update_cif_bank_if_missing(doc):
+    # Only update bank if it's missing
+    bank = frappe.db.get_value("CIF Sheet", doc.inv_no, "bank")
+
+    if bank:
+        doc.bank=bank
+        frappe.get_meta(doc.doctype).get_field("bank").read_only = 1
+
+    else:
+        if(doc.bank):
+            frappe.db.set_value("CIF Sheet", doc.inv_no, "bank", doc.bank)
+            frappe.db.commit()
+        else:
+            frappe.throw('Bank name not put in CIF Sheet, Please input Bank name')
+            
+
+def protect_delete(doc):
+    # Total received
+    total_received = frappe.db.sql("""
+        SELECT IFNULL(SUM(received), 0)
+        FROM `tabDoc Received`
+        WHERE inv_no = %s
+    """, (doc.inv_no,))[0][0] or 0
+
+    # Total refund
+    total_ref = frappe.db.sql("""
+        SELECT IFNULL(SUM(refund_amount), 0)
+        FROM `tabDoc Refund`
+        WHERE inv_no = %s
+    """, (doc.inv_no))[0][0] or 0
+
+    if (total_received + total_ref) > 0:
+        frappe.throw("❌ Cannot delete: Related receipts or refunds already exist.")
+
+
+
+def put_value_from_cif(doc):
+    if doc.is_new():
+        fields = ["inv_date", "category", "notify", "customer", "bank", "payment_term", "due_date"]
+        data = frappe.db.get_value("CIF Sheet", doc.inv_no, fields, as_dict=True)
+
+        if data:
+            for field in fields:
+                if not getattr(doc, field):  # only set if value is missing
+                    setattr(doc, field, data.get(field))
+
+
 class DocNego(Document): 
     def validate(self):
         final_validation(self)
+        update_cif_bank_if_missing(self)
+    
+    def before_save(self):
+        put_value_from_cif(self)
+    
+    def on_trash(self):
+        protect_delete(self)
+
+
+
+    
 
 
 @frappe.whitelist()
@@ -98,17 +156,6 @@ def get_cif_data(inv_no):
     cif["can_nego"]=(doc- total_nego) + min(total_nego-total_received,0)
 
     return cif
-
-@frappe.whitelist()
-def update_cif_bank_if_missing(inv_no, bank_value):
-    if not inv_no or not bank_value:
-        return
-
-    # Only update bank if it's missing
-    bank = frappe.db.get_value("CIF Sheet", inv_no, "bank")
-    if not bank:
-        frappe.db.set_value("CIF Sheet", inv_no, "bank", bank_value)
-        frappe.db.commit()
 
 @frappe.whitelist()
 def get_available_inv_no(doctype, txt, searchfield, start, page_len, filters):

@@ -258,7 +258,8 @@ def get_doc_flow(inv_name):
 
     if coll > 0:
         buttons_html += f"""
-        <a href="#"  onclick="frappe.new_doc('Doc Nego', {{ inv_no: '{inv_name}'}}); return false;" 
+        <a href="#"  onclick="frappe.new_doc('Doc Nego', {{ inv_no: '{inv_name}', bank:'{doc.bank}',nego_date:'{today_str}', term_days:'{doc.term_days}',
+        nego_amount: {coll}, bank_due_date:'{due_date_str}'}}); return false;" 
         class="btn btn-primary btn-sm" style="margin-left: 8px; background-color:blue;">Nego</a>
         """
 
