@@ -5,6 +5,32 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from datetime import datetime, timedelta
+from frappe.utils import getdate, add_days
+
+
+def calculate_term_days(doc):
+    if doc.bank_due_date and doc.nego_date:
+        due_date = getdate(doc.bank_due_date)
+        nego_date = getdate(doc.nego_date)
+
+        if due_date > nego_date:
+            doc.term_days = (due_date - nego_date).days
+        else:
+            frappe.throw(
+                title="Invalid Date",
+                msg="Bank Due Date must be after Negotiation Date."
+            )
+
+def calculate_due_date(doc):
+    if doc.term_days and doc.nego_date and not doc.bank_due_date:
+        if doc.term_days > 0:
+            nego_date = getdate(doc.nego_date)
+            doc.bank_due_date = add_days(nego_date, doc.term_days)
+        else:
+            frappe.throw(
+                title="Invalid Term Days",
+                msg="Term Days must be a positive integer."
+            )
 
 
 def final_validation(doc):
@@ -54,20 +80,20 @@ def final_validation(doc):
         """))
 
 
-    # convert strings to date if needed
-    if isinstance(doc.nego_date, str):
-        nego_date = datetime.strptime(doc.nego_date, "%Y-%m-%d").date()
+    nego_date = getdate(doc.nego_date) if doc.nego_date else None
+    inv_date = getdate(cif_data.inv_date) if cif_data.inv_date else None
 
-    if isinstance(inv_date, str):
-        inv_date = datetime.strptime(inv_date, "%Y-%m-%d").date()
+    if not inv_date:
+        frappe.throw(_("🛑 Please set the <b>Invoice Date</b> before saving."))
 
-    if nego_date and inv_date and nego_date < inv_date:
+    if not nego_date:
+        frappe.throw(_("🛑 Please set the <b>Nego Date</b> before saving."))
+
+    if nego_date < inv_date:
         frappe.throw(
             _("🛑 <b>Nego Date</b> cannot be before the <b>Invoice Date</b>. Please correct the dates."),
             title=_("Date Validation Error")
         )
-        doc.nego_date = None
-
 
 def update_cif_bank_if_missing(doc):
     # Only update bank if it's missing
@@ -109,6 +135,9 @@ class DocNego(Document):
     def validate(self):
         final_validation(self)
         update_cif_bank_if_missing(self)
+        calculate_term_days(self)
+        calculate_due_date
+
     
     def before_save(self):
         put_value_from_cif(self)

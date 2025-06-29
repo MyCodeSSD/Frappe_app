@@ -165,37 +165,11 @@ function toggle_expense_section(frm) {
     }
 }
 
-
+//  Create Custom Print button
 function custom_print(frm){
     frm.add_custom_button("Custom Print", function() {
-            frappe.call({
-                method: "ssd_app.my_custom.report.cif_sheet_table.cif_sheet_table.get_cif_details",
-                args: {
-                inv_name: frm.doc.name
-                },
-                callback: function(r) {
-                    if (r.message) {
-                        let dialog = new frappe.ui.Dialog({
-                            title: 'CIF Sheet: ' + frm.doc.inv_no,
-                            size: 'large',
-                            primary_action_label: 'PDF',
-                            primary_action: () => {
-                                window.open(`/api/method/ssd_app.my_custom.report.cif_sheet_table.cif_sheet_table.get_cif_details?inv_name=${frm.doc.name}&pdf=1`, '_blank');
-                            },
-                            fields: [
-                                {
-                                    fieldtype: 'HTML',
-                                    fieldname: 'details_html',
-                                    options: `<div id="cif-details-a4" style="width: 20cm; max-width:100%; min-height: 28.7cm; padding: 0.3cm; background: white; font-size: 13px; box-shadow: 0 0 8px rgba(0,0,0,0.2);">${r.message}</div>`
-                                }
-                            ]
-                        });
-                        dialog.show();
-
-                    } 
-                }
-            });
-        });
+        showCIFDetails(frm.doc.name, frm.doc.inv_no);
+    });
 }
 
 // ------------------------------------------------------- Main DocType ------------------------------------------------------

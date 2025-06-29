@@ -46,12 +46,36 @@ def final_validation(doc):
             <b>Total Refund (including this):</b> {(total_ref + doc.refund_amount):,.2f}
         """)
 
+
+def protect_delete(doc):
+    if frappe.db.exists("Doc Received", {"inv_no": doc.inv_no}):
+        frappe.throw("❌ Cannot delete: Doc Already Received part or full")
+
+
+def put_value_from_cif(doc):
+    if doc.is_new():
+        fields = ["customer", "bank", "notify", "payment_term"]
+        data = frappe.db.get_value("CIF Sheet", doc.inv_no, fields, as_dict=True)
+
+        if data:
+            for field in fields:
+                if not getattr(doc, field):  # only set if value is missing
+                    setattr(doc, field, data.get(field))
+
+    
+
 # ----------------------------
 # 📄 DocType Class
 # ----------------------------
 class DocRefund(Document):
     def validate(self):
         final_validation(self)
+
+    def before_save(self):
+        put_value_from_cif(self)
+
+    def on_trash(self):
+        protect_delete(self)
 
 # ----------------------------
 # 🔍 For Link Field Filtering

@@ -281,8 +281,9 @@
   },
   {
    "fieldname": "agent",
-   "fieldtype": "Data",
-   "label": "Agent"
+   "fieldtype": "Link",
+   "label": "Agent",
+   "options": "Comm Agent"
   },
   {
    "default": "Quantity",
@@ -348,7 +349,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-25 10:06:42.045309",
+ "modified": "2025-06-30 01:41:31.401755",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "Cost Sheet",

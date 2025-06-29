@@ -1,0 +1,87 @@
+{
+ "actions": [],
+ "autoname": "comm_p-.####",
+ "creation": "2025-06-30 01:28:08.777328",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "agent",
+  "date",
+  "column_break_gyyv",
+  "amount_usd",
+  "note",
+  "section_break_ajbj",
+  "comm_breakup"
+ ],
+ "fields": [
+  {
+   "fieldname": "agent",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Agent",
+   "options": "Comm Agent",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "note",
+   "fieldtype": "Data",
+   "label": "Note"
+  },
+  {
+   "fieldname": "column_break_gyyv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ajbj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "comm_breakup",
+   "fieldtype": "Table",
+   "label": "Comm Breakup",
+   "options": "Comm Breakup",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount_usd",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Amount (USD)",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-06-30 03:14:17.796033",
+ "modified_by": "Administrator",
+ "module": "My Custom",
+ "name": "Comm Paid",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
