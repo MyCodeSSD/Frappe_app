@@ -362,50 +362,9 @@ function update_exp_and_totals(frm, cdt, cdn) {
     calculate_sales(frm);
     calculate_cc(frm);
 }
+ 
 
-function showCIFDetails(inv_name, inv_no) {
-    frappe.call({
-        method: "ssd_app.my_custom.doctype.cif_sheet.cif_sheet.render_cif_sheet_pdf",
-        args: { inv_name },
-        callback: function (r) {
-            if (!r.message) return;
-            const htmlContent = `
-                <div id="cif-details-a4" style="
-                    width: 20cm;
-                    max-width: 100%;
-                    min-height: 28.7cm;
-                    padding: 0.3cm;
-                    background: white;
-                    font-size: 13px;
-                    box-shadow: 0 0 8px rgba(0,0,0,0.2);"
-                >${r.message}</div>
-            `;
-
-            const dialog = new frappe.ui.Dialog({
-                title: `CIF Sheet: ${inv_no}`,
-                size: 'large',
-                primary_action_label: 'PDF',
-                primary_action() {
-                    window.open(
-                        `/api/method/ssd_app.my_custom.doctype.cif_sheet.cif_sheet.render_cif_sheet_pdf?inv_name=${inv_name}&pdf=1`,
-                        '_blank'
-                    );
-                },
-                fields: [
-                    {
-                        fieldtype: 'HTML',
-                        fieldname: 'details_html',
-                        options: htmlContent
-                    }
-                ]
-            });
-
-            dialog.show();
-        }
-    });
-} 
-
-
+//If Doc Nego or Receive then lock Bank Name & document Amount 
 function check_and_lock_fields(frm) {
     if (frm.is_new() || !frm.doc.inv_no) return;
 
