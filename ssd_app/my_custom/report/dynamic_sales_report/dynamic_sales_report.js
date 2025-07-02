@@ -12,7 +12,8 @@ frappe.query_reports["Dynamic Sales Report"] = {
     formatter: function (value, row, column, data, default_formatter) {
         value = default_formatter(value, row, column, data);
         if (data) {
-            return `<a style="color:blue;" href="#" onclick="showInvList('${column.fieldname}', '${data.group_value}'); return false;">${value}</a>`;
+            const first_column_fieldname = frappe.query_report.columns[0].label;
+            return `<a href="#" onclick="showInvWise('${first_column_fieldname}', '${data.group_value}','${column.fieldname}'); return false;">${value}</a>`;
         }
         return value;
     },
@@ -46,16 +47,16 @@ frappe.query_reports["Dynamic Sales Report"] = {
 
 
 // 🧾 Modal Dialog to Show Document Flow
-function showInvList(row, column) {
+function showInvWise(group_by, head, month) {
     inv_name="cif-0027"
     inv_no="cif-0027"
     frappe.call({
-        method: "ssd_app.my_custom.report.document_receivable.document_receivable.get_doc_flow",
-        args: { inv_name },
+        method: "ssd_app.my_custom.report.dynamic_sales_report.dynamic_sales_report.show_inv_wise",
+        args: { inv_name, group_by, head, month},
         callback: function (r) {
             if (r.message) {
                 const d = new frappe.ui.Dialog({
-                    title: `Document Flow for: ${inv_no}`,
+                    title: `Document Flow for: ${group_by}, ${head}, ${month}`,
                     size: 'extra-large',
                     fields: [
                         {
