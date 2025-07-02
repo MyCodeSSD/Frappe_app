@@ -5,10 +5,28 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.pdf import get_pdf
 
+def set_from_country(doc):
+    if not doc.load_port:
+        return
+    from_country = frappe.db.get_value("Port", doc.load_port, "country")
+    # Optionally, save it into the doc:
+    doc.from_country = from_country
 
-class CIFSheet(Document):   
-	pass
+def set_to_country(doc):
+    if not doc.final_destination:
+        return
+    to_country = frappe.db.get_value("City", doc.final_destination, "country")
+    # Optionally, save it into the doc:
+    doc.to_country = to_country
 
+class CIFSheet(Document):
+    def refresh(self):
+        set_to_country(self)
+        set_from_country(self)
+
+    def before_save(self):
+        set_to_country(self)
+        set_from_country(self)
 
 @frappe.whitelist()
 def render_cif_sheet_pdf(inv_name, pdf=0):

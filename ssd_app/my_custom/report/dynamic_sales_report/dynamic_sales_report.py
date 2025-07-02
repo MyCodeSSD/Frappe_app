@@ -6,9 +6,12 @@ today_str = date.today().strftime("%Y-%m-%d")
 
 
 filter_data_dict = {
-        "Customer": {"dc": "tabCustomer", "field": "code", "l_field": "customer"},
-        "Notify": {"dc": "tabNotify", "field": "code", "l_field": "notify"},
-        "Category": {"dc": "tabProduct Category", "field": "product_category", "l_field": "category"}
+        "Customer": {"dc": "tabCustomer", "as":"cus", "field": "code", "l_field": "customer"},
+        "Notify": {"dc": "tabNotify", "as":"noti", "field": "code", "l_field": "notify"},
+        "Category": {"dc": "tabProduct Category", "as":"pc", "field": "product_category", "l_field": "category"},
+        "From Country": {"dc": "tabCountry", "as":"fc", "field": "country_name", "l_field": "from_country"},
+        "To Country": {"dc": "tabCountry", "as":"tc", "field": "country_name", "l_field": "to_country"},
+        "Company": {"dc": "tabCompany", "as":"com", "field": "company_code", "l_field": "accounting_company"}
     }
 
 def execute(filters=None):
@@ -56,6 +59,7 @@ def execute(filters=None):
             "label": m['label'],
             "fieldname": m['label'].lower().replace('-', '_'),
             "fieldtype": "Float",
+            "precision": 0,
             "width": 110
         })
     # Add total column
@@ -116,13 +120,14 @@ def execute(filters=None):
 
 
 @frappe.whitelist()
-def show_inv_wise(group_by, head, month):
-    mon = month.split("_")[0]
-    yr= month.split("_")[1]
+def show_inv_wise(group_by, head, month_year):
+    month = month_year.split("_")[0]
+    year= month_year.split("_")[1]
     month_map= {"jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6, "jul":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12}
     filter_field = filter_data_dict[group_by]["field"]
     filter_dc = filter_data_dict[group_by]["dc"]
     filter_l_field = filter_data_dict[group_by]["l_field"]
+    as_name = filter_data_dict[group_by]["as"]
 
 
     # Build SQL query
@@ -131,24 +136,27 @@ def show_inv_wise(group_by, head, month):
             cif.name, 
             cif.inv_no, 
             cif.inv_date, 
-            pg.product_category AS Category, 
+            pc.product_category AS Category, 
             cus.code AS Customer, 
             noti.code AS Notify, 
             cif.sales, 
             cif.document, 
             cif.cc 
         FROM `tabCIF Sheet` cif 
-        JOIN `tabProduct Category` pg ON pg.name = cif.category
-        JOIN `tabCustomer` cus ON cus.name = cif.customer
-        JOIN `tabNotify` noti ON noti.name = cif.notify
+        LEFT JOIN `tabProduct Category` pc ON pc.name = cif.category
+        LEFT JOIN `tabCustomer` cus ON cus.name = cif.customer
+        LEFT JOIN `tabNotify` noti ON noti.name = cif.notify
+        LEFT JOIN `tabCountry` fc ON fc.name = cif.from_country
+        LEFT JOIN `tabCountry` tc ON tc.name = cif.to_country
+        LEFT JOIN `tabCompany` com ON com.name = cif.accounting_company
         WHERE MONTH(cif.inv_date) = %(month)s
         AND YEAR(cif.inv_date) = %(year)s
-        AND pg.{filter_field} = %(head)s
+        AND {as_name}.{filter_field} = %(head)s
         ORDER BY cif.inv_date DESC
         LIMIT 50
     """, {
-        "month": month_map[mon.lower()],
-        "year": yr,
+        "month": month_map[month.lower()],
+        "year": year,
         "head": head
     }, as_dict=True)
 
@@ -181,18 +189,19 @@ def show_inv_wise(group_by, head, month):
             top: 0;
             z-index: 1;
         }
+        
     </style>
     <table class="cif-table">
         <thead>
             <tr>
-                <th>Inv No</th>
-                <th>Inv Date</th>
-                <th>Category</th>
-                <th>Customer</th>
-                <th>Notify</th>
-                <th>Sales</th>
-                <th>Document</th>
-                <th>CC</th>
+                <th style="text-align:center;">Inv No</th>
+                <th style="text-align:center;">Inv Date</th>
+                <th style="text-align:center;">Category</th>
+                <th style="text-align:center;">Customer</th>
+                <th style="text-align:center;">Notify</th>
+                <th style="text-align:center;">Sales</th>
+                <th style="text-align:center;">Document</th>
+                <th style="text-align:center;">CC</th>
             </tr>
         </thead>
         <tbody>
@@ -207,9 +216,9 @@ def show_inv_wise(group_by, head, month):
                 <td>{row.Category or ""}</td>
                 <td>{row.Customer or ""}</td>
                 <td>{row.Notify or ""}</td>
-                <td style="text-align:right;">{frappe.format(row.sales, {"fieldtype": "Currency"})}</td>
-                <td>{row.document or ""}</td>
-                <td>{row.cc or ""}</td>
+                <td style="text-align:right;">{'{:,.2f}'.format(row.sales or 0)}</td>
+                <td style="text-align:right;">{'{:,.2f}'.format(row.document or 0)}</td>
+                <td style="text-align:right;">{'{:,.2f}'.format(row.cc or 0)}</td>
             </tr>
         """
 

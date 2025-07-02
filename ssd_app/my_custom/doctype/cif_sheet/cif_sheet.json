@@ -58,8 +58,10 @@
   "bank_ref_no",
   "section_break_kazq",
   "load_port",
+  "from_country",
   "column_break_ssyf",
   "destination_port",
+  "to_country",
   "column_break_hjaw",
   "final_destination"
  ],
@@ -380,13 +382,27 @@
    "fieldtype": "Table",
    "label": "Expenses",
    "options": "Expenses CIF"
+  },
+  {
+   "fieldname": "from_country",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "From Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "to_country",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "To Country",
+   "options": "Country"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-06-25 10:42:58.566722",
+ "modified": "2025-07-02 20:53:07.063730",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "CIF Sheet",
