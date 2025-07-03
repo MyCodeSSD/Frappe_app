@@ -121,15 +121,22 @@ def execute(filters=None):
 
 @frappe.whitelist()
 def show_inv_wise(group_by, head, month_year):
-    month = month_year.split("_")[0]
-    year= month_year.split("_")[1]
     month_map= {"jan":1, "feb":2, "mar":3, "apr":4, "may":5, "jun":6, "jul":7, "aug":8, "sep":9, "oct":10, "nov":11, "dec":12}
+
+    if(month_year=="total"):
+        month_filter= "1=1"
+    else:
+
+        month, year = month_year.split("_")
+        month_number = month_map[month.lower()]
+        month_filter = f"""MONTH(cif.inv_date) = '{month_number}' AND YEAR(cif.inv_date) ='{year}'"""
+
     filter_field = filter_data_dict[group_by]["field"]
-    filter_dc = filter_data_dict[group_by]["dc"]
-    filter_l_field = filter_data_dict[group_by]["l_field"]
     as_name = filter_data_dict[group_by]["as"]
 
-
+    filters={
+        "head": head
+    }
     # Build SQL query
     data = frappe.db.sql(f"""
         SELECT 
@@ -149,20 +156,19 @@ def show_inv_wise(group_by, head, month_year):
         LEFT JOIN `tabCountry` fc ON fc.name = cif.from_country
         LEFT JOIN `tabCountry` tc ON tc.name = cif.to_country
         LEFT JOIN `tabCompany` com ON com.name = cif.accounting_company
-        WHERE MONTH(cif.inv_date) = %(month)s
-        AND YEAR(cif.inv_date) = %(year)s
+        WHERE {month_filter}
         AND {as_name}.{filter_field} = %(head)s
         ORDER BY cif.inv_date DESC
         LIMIT 50
-    """, {
-        "month": month_map[month.lower()],
-        "year": year,
-        "head": head
-    }, as_dict=True)
+    """, filters, as_dict=True)
 
 
     if not data:
         return "<p>No data found.</p>"
+    
+    total_sales = sum(row.sales or 0 for row in data)
+    total_document = sum(row.document or 0 for row in data)
+    total_cc = sum(row.cc or 0 for row in data)
 
     # Build HTML table
     html = """
@@ -222,6 +228,17 @@ def show_inv_wise(group_by, head, month_year):
             </tr>
         """
 
-    html += "</tbody></table>"
+    # Add tfoot with totals
+    html += f"""
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5" style="text-align:center;">Total</td>
+                <td style="text-align:right;">{'{:,.2f}'.format(total_sales)}</td>
+                <td style="text-align:right;">{'{:,.2f}'.format(total_document)}</td>
+                <td style="text-align:right;">{'{:,.2f}'.format(total_cc)}</td>
+            </tr>
+        </tfoot>
+    </table>"""
 
     return html

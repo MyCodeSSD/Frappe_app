@@ -57,14 +57,7 @@ frappe.query_reports["Document Receivable"] = {
             fieldtype: "Date",
             default: frappe.datetime.get_today(),
             reqd: 1
-        },
-        {
-        fieldname: "customer",
-        label: "Customer",
-        fieldtype: "Link",
-        options: "Customer"
-        // optional: you could add "reqd: 0" if you want it optional
-    }
+        }
     ]
 };
 
