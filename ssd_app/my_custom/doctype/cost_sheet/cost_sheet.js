@@ -232,6 +232,13 @@ function run_all_calculations(frm) {
     calculate_purchase(frm);
 }
 
+//  Create Custom Print button
+function custom_print(frm){
+    frm.add_custom_button("Custom Print", function() {
+        showCostDetails(frm.doc.name, frm.doc.custom_title);
+    });
+}
+
 // Hooks
 frappe.ui.form.on("Cost Sheet", {
     setup: inv_no_filter,
@@ -241,6 +248,7 @@ frappe.ui.form.on("Cost Sheet", {
     refresh(frm) {
         toggle_po_no_field(frm);
         toggle_supplier_field(frm);
+        custom_print(frm);
     },
     multiple_po: toggle_po_no_field,
     multiple_supplier: toggle_supplier_field,
@@ -251,7 +259,10 @@ frappe.ui.form.on("Cost Sheet", {
     comm_based_on(frm) {
         calculate_commission(frm);
         calculate_cost(frm);
-    }
+    },
+    after_save(frm) {
+        showCostDetails(frm.doc.name, frm.doc.custom_title);
+    },
 });
 
 frappe.ui.form.on("Product Cost", {
@@ -267,3 +278,46 @@ frappe.ui.form.on("Expenses Cost", {
     amount: update_exp_and_totals,
     ex_rate: update_exp_and_totals
 });
+
+
+function showCostDetails(cost_id, inv_no) {
+    frappe.call({
+        method: "ssd_app.my_custom.doctype.cost_sheet.cost_sheet.render_cost_sheet_pdf",
+        args: { cost_id },
+        callback: function (r) {
+            if (!r.message) return;
+            const htmlContent = `
+                <div id="cost-details-a4" style="
+                    width: 20cm;
+                    max-width: 100%;
+                    min-height: 28.7cm;
+                    padding: 0.3cm;
+                    background: white;
+                    font-size: 13px;
+                    box-shadow: 0 0 8px rgba(0,0,0,0.2);"
+                >${r.message}</div>
+            `;
+
+            const dialog = new frappe.ui.Dialog({
+                title: `Cost Sheet: ${inv_no}`,
+                size: 'large',
+                primary_action_label: 'PDF',
+                primary_action() {
+                    window.open(
+                        `/api/method/ssd_app.my_custom.doctype.cost_sheet.cost_sheet.render_cost_sheet_pdf?cost_id=${cost_id}&pdf=1`,
+                        '_blank'
+                    );
+                },
+                fields: [
+                    {
+                        fieldtype: 'HTML',
+                        fieldname: 'details_html',
+                        options: htmlContent
+                    }
+                ]
+            });
+
+            dialog.show();
+        }
+    });
+} 

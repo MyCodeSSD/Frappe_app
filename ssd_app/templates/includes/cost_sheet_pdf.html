@@ -1,10 +1,10 @@
  <div style="font-family: Arial; font-size: 12px; padding: 10px; ">
-    <h2 style="text-align: center; margin-bottom: 10px;">CIF Sheet</h2>
+    <h2 style="text-align: center; margin-bottom: 10px;">Cost Sheet</h2>
     <hr>
 
     <table style="width: 100%; border-collapse: collapse;">
         <tr>
-            <td><b>Inv No.:</b> {{doc.inv_no}}</td>
+            <td><b>Inv No.:</b> {{doc.custom_title}}</td>
             <td><b>Inv Date:</b> {{doc.inv_date}}</td>
             <td><b>Company:</b>{{doc.acc_com_name}}</td>
         </tr>
@@ -14,7 +14,6 @@
             <td><b>Customer:</b> {{doc.customer_name}}</td>
         </tr>
     </table>
-    <hr>
 
     <h3>Product Details</h3>
     <div style="overflow-x: auto; width: 100%;">
@@ -22,7 +21,7 @@
             <thead style="background-color: #d9d9d9;">
                 <tr>
                     <th>Product</th>
-                    <th>SC No</th>
+                    <th>PO No</th>
                     <th>Qty</th>
                     <th>Unit</th>
                     <th style="text-align: right;">Rate</th>
@@ -58,7 +57,7 @@
 
                 <tr>
                 <td>{{ p.product }}</td>
-                <td>{{ p.sc_no }}</td>
+                <td>{{ p.po_no }}</td>
                 <td style="text-align: right;">{{ "{:,.2f}".format(p.qty) }}</td>
                 <td>{{ p.unit }}</td>
                 <td style="text-align: right;">{{"{:,.2f}".format(p.rate)}}</td>
@@ -87,11 +86,12 @@
             </tbody>
         </table>
     </div>
+
     <br><hr>
     <table style="width: 60%; border-collapse: collapse;">
         <tr>
-            <td><b> Gross Sales </b></td>
-            <td style="text-align: right;"><b>{{"{:,.2f}".format(doc.gross_sales)}}</b></td>
+            <td><b> Purchase </b></td>
+            <td style="text-align: right;"><b>{{"{:,.2f}".format(doc.purchase)}}</b></td>
         </tr>
         {% for label, amount in expenses.items() %}
         <tr>
@@ -100,46 +100,26 @@
         </tr>
         {% endfor %}
         <tr>
-            <td> Insurance</td>
-            <td style="text-align: right;">{{"{:,.2f}".format(doc.insurance)}}</td>
+            <td> Commission</td>
+            <td style="text-align: right;">{{"{:,.2f}".format(doc.commission)}}</td>
         </tr>
     </table>
-
     <hr>
-
     <table style="width: 60%; border-collapse: collapse;">
         <tr>
-            <td> Sales </td>
+            <td> Cost </td>
+            <td style="text-align: right;">{{"{:,.2f}".format(doc.cost)}}</td>
+        </tr>
+        <tr>
+            <td> Sales</td>
             <td style="text-align: right;">{{"{:,.2f}".format(doc.sales)}}</td>
         </tr>
         <tr>
-            <td> Document</td>
-            <td style="text-align: right;">{{"{:,.2f}".format(doc.document)}}</td>
-        </tr>
-        <tr>
-            <td> CC</td>
-            <td style="text-align: right;">{{"{:,.2f}".format(doc.cc)}}</td>
+            <td> Profit/Loss  ({{"{:,.2f}".format(doc.profit_pct)}}%)</td>
+            <td style="text-align: right;">{{"{:,.2f}".format(doc.profit)}}</td>
         </tr>
     </table>
-        <hr>
-    
-    <table style="width: 100%;">
-        <tr>
-            <td>
-                <b>Payment Term:</b> {{ doc.payment_term }}
-                {% if doc.payment_term in ['LC', 'DA'] %}
-                    - {{ doc.term_days }}
-                {% endif %}
-                </td>
-            <td><b>From Date:</b> {{doc.from_date}}</td>
-            <td><b>Due Date:</b> {{doc.due_date}}</td>
-        </tr>
-        <tr>
-            <td><b>Bank:</b> {{doc.bank_name}}</td>
-            <td><b>Bank Ref No.:</b> {{doc.bank_ref_no}}</td>    
-        </tr>
-    </table>
-    <hr>
+    <hr> 
     <table style="width: 100%;">
         <tr>
             <td><b>From Country:</b>{{doc.f_country_name}}</td>
@@ -155,7 +135,7 @@
     <p style="font-size: 11px; color: #888; text-align: right; margin: 0;">
         Generated on: {{ generated_date }}
     </p>
-    </div>
+</div>
    
 
 

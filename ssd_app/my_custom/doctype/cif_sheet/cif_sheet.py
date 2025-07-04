@@ -4,6 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils.pdf import get_pdf
+from frappe.utils import now_datetime
 
 def set_from_country(doc):
     if not doc.load_port:
@@ -66,7 +67,7 @@ def render_cif_sheet_pdf(inv_name, pdf=0):
         "doc": doc,
         "product":product,
         "expenses":expenses,
-        "generated_date": frappe.utils.nowdate(),
+        "generated_date": now_datetime().strftime("%Y-%m-%d %H:%M:%S"),
         "custom_message": "Generated from Python",
         "formatted_date": frappe.format_value(doc.inv_date, {"fieldtype": "Date"})
     }
