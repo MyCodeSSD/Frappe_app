@@ -206,6 +206,7 @@ frappe.ui.form.on("CIF Sheet", {
         put_sc_no_in_child_row(frm);
         toggle_category_readonly(frm);
         calculate_cc(frm);
+        checkDuplicateExpensesOnValidation(frm);
     },
     from_date: function(frm) {
         calculate_due_date(frm);
@@ -349,7 +350,8 @@ function update_all(frm, cdt, cdn) {
 
 frappe.ui.form.on("Expenses CIF", {
     amount: update_exp_and_totals,
-    ex_rate: update_exp_and_totals
+    ex_rate: update_exp_and_totals,
+    expenses: checkDuplicateExpenses
 });
 
 function calculate_exp(cdt, cdn) {
@@ -362,7 +364,36 @@ function update_exp_and_totals(frm, cdt, cdn) {
     calculate_sales(frm);
     calculate_cc(frm);
 }
+
+// protect duplicate expnses entry
+function checkDuplicateExpenses(frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+    let table = frm.doc.expenses;  
+
+    let is_duplicate = table.some(r =>
+        r.name !== row.name && r.expenses === row.expenses
+    );
+
+    if (is_duplicate) {
+        frappe.msgprint('Expenses must be unique.');
+        frappe.model.set_value(cdt, cdn, 'expenses', null); // clear the field
+    }
+}
  
+
+// Check duplicates on validation
+function checkDuplicateExpensesOnValidation(frm) {
+    let table = frm.doc.expenses || [];
+    let expenses_values = table.map(r => r.expenses).filter(Boolean);
+
+    let unique_values = new Set(expenses_values);
+
+    if (expenses_values.length !== unique_values.size) {
+        frappe.throw(__('Expenses must be unique.'));
+    }
+}
+
+
 
 //If Doc Nego or Receive then lock Bank Name & document Amount 
 function check_and_lock_fields(frm) {

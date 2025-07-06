@@ -73,7 +73,7 @@ def get_cif_data(inv_name=None):
         GROUP BY inv_no
     ) t_rec ON cif.name = t_rec.inv_no
     {conditional_format}
-    ORDER BY cif.inv_date DESC;
+    ORDER BY cif.creation DESC ;
     """, as_dict=1)
     return data
 

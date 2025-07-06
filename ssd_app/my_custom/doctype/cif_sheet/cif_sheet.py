@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils.pdf import get_pdf
 from frappe.utils import now_datetime
+from frappe import _
 
 def set_from_country(doc):
     if not doc.load_port:
@@ -20,6 +21,14 @@ def set_to_country(doc):
     # Optionally, save it into the doc:
     doc.to_country = to_country
 
+def validate_unique_expenses(doc):
+        seen = set()
+        for row in doc.expenses:
+            if row.expenses in seen:
+                frappe.throw(_('Expenses must be unique: {0}').format(row.expenses))
+            seen.add(row.expenses)
+
+
 class CIFSheet(Document):
     def refresh(self):
         set_to_country(self)
@@ -28,7 +37,10 @@ class CIFSheet(Document):
     def before_save(self):
         set_to_country(self)
         set_from_country(self)
+    def validate(self):
+        validate_unique_expenses(self)
 
+    
 @frappe.whitelist()
 def render_cif_sheet_pdf(inv_name, pdf=0):
     doc = frappe.get_doc("CIF Sheet", inv_name)

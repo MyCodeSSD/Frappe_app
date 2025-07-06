@@ -1,6 +1,6 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "cc_rec-.####",
  "creation": "2025-06-30 00:22:40.036593",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -88,10 +88,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-30 16:40:25.822294",
+ "modified": "2025-07-07 02:04:44.517440",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "CC Received",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

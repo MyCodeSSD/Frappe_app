@@ -6,6 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils.pdf import get_pdf
 from frappe.utils import now_datetime
+from frappe import _
 
 @frappe.whitelist()
 def get_cif_data(inv_no):
@@ -74,9 +75,17 @@ def get_available_inv_no(doctype, txt, searchfield, start, page_len, filters):
         LIMIT %s OFFSET %s
     """, tuple(values))
 
+def validate_unique_expenses(doc):
+        seen = set()
+        for row in doc.expenses:
+            if row.expenses in seen:
+                frappe.throw(_('Expenses must be unique: {0}').format(row.expenses))
+            seen.add(row.expenses)
+
 
 class CostSheet(Document):
-    pass
+    def validate(self):
+        validate_unique_expenses(self)
 
 
 # To Prepare Cost Sheet PDF
@@ -94,7 +103,8 @@ def render_cost_sheet_pdf(cost_id, pdf=0):
     doc.notify_city=frappe.db.get_value("Notify", doc.notify, "city")
     doc.t_country_name=frappe.db.get_value("City", doc.notify_city, "country")
     doc.destination_port_name=frappe.db.get_value("Port", cif_doc.destination_port, "port")
-   
+    doc.agent_name=frappe.db.get_value("Comm Agent", doc.agent, "agent_name")
+
     product =  frappe.db.sql("""
         SELECT p.parent, pg.product_group, pro.product, p.po_no, p.qty, u.unit, p.rate, p.currency, p.ex_rate, 
             p.charges, p.charges_amount, p.gross, p.gross_usd 

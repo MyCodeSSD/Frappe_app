@@ -1,6 +1,7 @@
 // Copyright (c) 2025, SSDolui and contributors
 // For license information, please see license.txt
 
+
 frappe.query_reports["Dynamic Sales Report"] = {
     onload: function(report) {
         // Wait until datatable is ready
@@ -9,31 +10,7 @@ frappe.query_reports["Dynamic Sales Report"] = {
             dt.refresh();
         });
     },
-    // formatter: function (value, row, column, data, default_formatter) {
-    //     // Use default_formatter first for non-numeric columns
-    //     value = default_formatter(value, row, column, data);
-
-    //     if (data) {
-    //         console.log(data);
-    //         const columns = frappe.query_report.columns;
-    //         const col_index = columns.findIndex(col => col.fieldname === column.fieldname);
-
-    //         // Skip first and last columns
-    //         const field_value = data[column.fieldname];
-    //         if (typeof field_value === "number"){
-    //             value = field_value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-    //             if (col_index < columns.length - 1) {
-    //                 if (field_value && field_value != 0) {
-    //                     const first_column_fieldname = columns[0].label; // corrected to fieldname
-    //                     return `<a href="#" onclick="showInvWise('${first_column_fieldname}', '${data.group_value}', '${column.fieldname}'); return false;">${value}</a>`;
-    //                 }
-    //             }
-    //         }
-            
-    //     }
-
-    //     return value;
-    // },
+    
     formatter: function (value, row, column, data, default_formatter) {
         // Use default_formatter first for non-numeric columns
         value = default_formatter(value, row, column, data);
@@ -42,24 +19,16 @@ frappe.query_reports["Dynamic Sales Report"] = {
         if (!data) {
             return value;
         }
-
         const columns = frappe.query_report.columns;
-        const col_index = columns.findIndex(col => col.fieldname === column.fieldname);
-
+        // const col_index = columns.findIndex(col => col.fieldname === column.fieldname);
         const field_value = data[column.fieldname];
 
-        if (typeof field_value === "number") {
-            // Format number with commas, no decimals
-            value = field_value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-
-            if (field_value !== 0) {
-                const first_column_fieldname = columns[0].label; // Corrected
-                const group_value = data[first_column_fieldname] || data.group_value || "";
-                return `<a href="#" onclick="showInvWise('${first_column_fieldname}', '${group_value}', '${column.fieldname}'); return false;">${value}</a>`;
-            }
-            // }
+        if (field_value !== 0) {
+            const first_column_fieldname = columns[0].label; // Corrected
+            const group_value = data[first_column_fieldname] || data.group_value || "";
+            return `<a href="#" onclick="showInvWise('${first_column_fieldname}', '${group_value}', '${column.fieldname}'); return false;">${value}</a>`;
         }
-
+         
         return value;
     },
 

@@ -9,7 +9,6 @@ if (typeof html2pdf === "undefined") {
 }
 
 
-
 frappe.query_reports["CIF Sheet Table"] = {
     onload: function (report) {
         report.page.add_inner_button("Open CIF Sheet List", function () {

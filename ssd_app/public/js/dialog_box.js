@@ -109,3 +109,46 @@ function showCIFDetails(inv_name, inv_no) {
         }
     });
 } 
+
+
+function showCostDetails(cost_id, inv_no) {
+    frappe.call({
+        method: "ssd_app.my_custom.doctype.cost_sheet.cost_sheet.render_cost_sheet_pdf",
+        args: { cost_id },
+        callback: function (r) {
+            if (!r.message) return;
+            const htmlContent = `
+                <div id="cost-details-a4" style="
+                    width: 20cm;
+                    max-width: 100%;
+                    min-height: 28.7cm;
+                    padding: 0.3cm;
+                    background: white;
+                    font-size: 13px;
+                    box-shadow: 0 0 8px rgba(0,0,0,0.2);"
+                >${r.message}</div>
+            `;
+
+            const dialog = new frappe.ui.Dialog({
+                title: `Cost Sheet: ${inv_no}`,
+                size: 'large',
+                primary_action_label: 'PDF',
+                primary_action() {
+                    window.open(
+                        `/api/method/ssd_app.my_custom.doctype.cost_sheet.cost_sheet.render_cost_sheet_pdf?cost_id=${cost_id}&pdf=1`,
+                        '_blank'
+                    );
+                },
+                fields: [
+                    {
+                        fieldtype: 'HTML',
+                        fieldname: 'details_html',
+                        options: htmlContent
+                    }
+                ]
+            });
+
+            dialog.show();
+        }
+    });
+} 
