@@ -93,16 +93,16 @@
             <td><b> Gross Sales </b></td>
             <td style="text-align: right;"><b>{{"{:,.2f}".format(doc.gross_sales)}}</b></td>
         </tr>
-        {% for label, amount in expenses.items() %}
+        {% for label, details in expenses.items() %}
         <tr>
             <td>
                 {{ label }}
-                {% if amount and  amount["currency"] != "USD" %}
-                    ({{ amount["currency"] }} {{ "{:,.2f}".format(amount["amount"] or 0) }})
+                {% if details and  details["currency"] != "USD" %}
+                    ({{ details["currency"] }} {{ "{:,.2f}".format(details["amount"] or 0) }})
                 {% endif %}
             </td>
             <td style="text-align: right;">
-                {{ "{:,.2f}".format(amount["total_amount"] or 0) }}
+                {{ "{:,.2f}".format(details["total_amount"] or 0) }}
             </td>
         </tr>
         {% endfor %}

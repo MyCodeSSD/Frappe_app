@@ -9,9 +9,13 @@
   "date",
   "amount",
   "currency",
-  "column_break_nzjp",
+  "column_break_blhc",
   "ex_rate",
+  "bank_charges",
   "amount_usd",
+  "company",
+  "column_break_nzjp",
+  "bank",
   "note",
   "section_break_haer",
   "cc_breakup"
@@ -83,12 +87,38 @@
    "fieldtype": "Float",
    "label": "Amount",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_blhc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "bank_charges",
+   "fieldtype": "Float",
+   "label": "Bank Charges",
+   "precision": "2",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-07 02:04:44.517440",
+ "modified": "2025-07-08 01:04:45.042861",
  "modified_by": "Administrator",
  "module": "My Custom",
  "name": "CC Received",

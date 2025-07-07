@@ -93,12 +93,21 @@
             <td><b> Purchase </b></td>
             <td style="text-align: right;"><b>{{"{:,.2f}".format(doc.purchase)}}</b></td>
         </tr>
-        {% for label, amount in expenses.items() %}
+       
+        {% for label, details in expenses.items() %}
         <tr>
-            <td>{{ label }}</td>
-            <td style="text-align: right;">{{"{:,.2f}".format(amount) }}</td>
+            <td>
+                {{ label }}
+                {% if details and  details["currency"] != "USD" %}
+                    ({{ details["currency"] }} {{ "{:,.2f}".format(details["amount"] or 0) }})
+                {% endif %}
+            </td>
+            <td style="text-align: right;">
+                {{ "{:,.2f}".format(details["total_amount"] or 0) }}
+            </td>
         </tr>
         {% endfor %}
+
         <tr>
             <td> Commission ({{doc.agent_name}} @ {{doc.comm_rate}})</td>
             <td style="text-align: right;">{{"{:,.2f}".format(doc.commission)}}</td>

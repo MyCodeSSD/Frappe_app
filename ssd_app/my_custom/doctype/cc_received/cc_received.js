@@ -115,13 +115,18 @@ frappe.ui.form.on("CC Received", {
     amount(frm) {
         // 🟩 Auto-calculate amount_usd when amount or ex_rate changes
         if (frm.doc.amount && frm.doc.ex_rate) {
-            frm.set_value('amount_usd', frm.doc.amount * frm.doc.ex_rate);
+            frm.set_value('amount_usd', frm.doc.amount * frm.doc.ex_rate - frm.doc.bank_charges);
         }
     },
 
     ex_rate(frm) {
         if (frm.doc.amount && frm.doc.ex_rate) {
-            frm.set_value('amount_usd', frm.doc.amount * frm.doc.ex_rate);
+            frm.set_value('amount_usd', frm.doc.amount * frm.doc.ex_rate - frm.doc.bank_charges );
+        }
+    },
+    bank_charges(frm) {
+        if (frm.doc.amount && frm.doc.ex_rate) {
+            frm.set_value('amount_usd', frm.doc.amount * frm.doc.ex_rate - frm.doc.bank_charges);
         }
     },
 

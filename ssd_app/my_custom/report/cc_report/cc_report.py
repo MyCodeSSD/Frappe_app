@@ -76,4 +76,8 @@ def execute(filters=None):
         {"label": "Balance", "fieldname": "balance", "fieldtype": "Float", "width": 120},
         {"label": "Narration", "fieldname": "note", "fieldtype": "Data", "width": 250},
     ]
+    if not filters.get("customer"):
+        customer_col = {"label": "Customer","fieldname": "customer","fieldtype": "Data","width": 150}
+        # insert at position 1 (second column)
+        columns.insert(2, customer_col)
     return columns, result

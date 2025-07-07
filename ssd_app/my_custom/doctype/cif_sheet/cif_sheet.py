@@ -74,7 +74,7 @@ def render_cif_sheet_pdf(inv_name, pdf=0):
         WHERE parent = %s
     
     """, (inv_name,), as_dict=1)
-    exp_dict_s = {
+    exp_dict = {
         i.expenses: {
             "amount": i.amount,
             "currency": i.currency,
@@ -82,8 +82,7 @@ def render_cif_sheet_pdf(inv_name, pdf=0):
         }
         for i in exp
     }
-    expenses = {e: exp_dict_s.get(e, 0) for e in ["Freight", "Local Exp", "Inland Charges", "Switch B/L Charges", "Others"]}
-    print(exp)
+    expenses = {e: exp_dict.get(e, 0) for e in ["Freight", "Local Exp", "Inland Charges", "Switch B/L Charges", "Others"]}
 
     context = {
         "doc": doc,

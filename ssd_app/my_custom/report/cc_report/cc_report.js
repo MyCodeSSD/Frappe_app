@@ -6,12 +6,14 @@ frappe.query_reports["CC Report"] = {
         report.page.add_inner_button("Balance Break", function () {
             // Fetch current filter values
             let filters = report.get_values();
-
             if (filters.customer && filters.as_on) {
                  ccBalanceBreakup(filters.customer, filters.as_on);
             } else {
                 frappe.msgprint(__("Please select a Customer & Date first."));
             }
+        });
+        report.page.add_inner_button("Go to CC Balance", function () {
+            frappe.set_route('query-report', 'CC Balance');
         });
     },
     "filters": [
