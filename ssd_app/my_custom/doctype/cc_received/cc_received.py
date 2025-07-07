@@ -67,16 +67,7 @@ def cc_balance_breakup(cus_id, as_on):
         inv_data= df.copy()
     else:
         inv_data = pd.DataFrame(columns=["ref_no", "amount"])
-
-
-
-
-
-
-
-
-
-  
+# -------------------------------
     query = """
         SELECT 
             ccb.ref_no, 
@@ -105,8 +96,10 @@ def cc_balance_breakup(cus_id, as_on):
         rec_data= df.copy()
     else:
         rec_data = pd.DataFrame(columns=["ref_no", "amount"])
+# ---------------------------------------------------------
 
     final_df = pd.concat([inv_data, rec_data], ignore_index=True)
+    final_df = final_df.groupby("ref_no")["amount"].sum().reset_index()
     # Build HTML table
     html = """
     <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">

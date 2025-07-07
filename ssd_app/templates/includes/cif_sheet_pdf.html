@@ -95,10 +95,19 @@
         </tr>
         {% for label, amount in expenses.items() %}
         <tr>
-            <td>{{ label }}</td>
-            <td style="text-align: right;">{{"{:,.2f}".format(amount) }}</td>
+            <td>
+                {{ label }}
+                {% if amount and  amount["currency"] != "USD" %}
+                    ({{ amount["currency"] }} {{ "{:,.2f}".format(amount["amount"] or 0) }})
+                {% endif %}
+            </td>
+            <td style="text-align: right;">
+                {{ "{:,.2f}".format(amount["total_amount"] or 0) }}
+            </td>
         </tr>
         {% endfor %}
+
+
         <tr>
             <td> Insurance</td>
             <td style="text-align: right;">{{"{:,.2f}".format(doc.insurance)}}</td>

@@ -67,13 +67,23 @@ def render_cif_sheet_pdf(inv_name, pdf=0):
         SELECT 
             parent, 
             expenses,
-            SUM(amount_usd) AS total_amount 
+            amount, 
+            currency,
+            amount_usd AS total_amount 
         FROM `tabExpenses CIF`
         WHERE parent = %s
-        GROUP BY expenses, parent
+    
     """, (inv_name,), as_dict=1)
-    exp_dict = {i.expenses: i.total_amount for i in exp}
-    expenses = {e: exp_dict.get(e, 0) for e in ["Freight", "Local Exp", "Inland Charges", "Switch B/L Charges", "Others"]}
+    exp_dict_s = {
+        i.expenses: {
+            "amount": i.amount,
+            "currency": i.currency,
+            "total_amount": i.total_amount
+        }
+        for i in exp
+    }
+    expenses = {e: exp_dict_s.get(e, 0) for e in ["Freight", "Local Exp", "Inland Charges", "Switch B/L Charges", "Others"]}
+    print(exp)
 
     context = {
         "doc": doc,

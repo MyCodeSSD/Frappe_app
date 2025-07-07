@@ -52,7 +52,7 @@ function ccBalanceBreakup(cus_id, as_on) {
             `;
 
             const dialog = new frappe.ui.Dialog({
-                title: `CIF Sheet: ${cus_id}`,
+                title: `CC Balabce Breakup of: ${cus_id}`,
                 size: 'small',
                 fields: [
                     {
