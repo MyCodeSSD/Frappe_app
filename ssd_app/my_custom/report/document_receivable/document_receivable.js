@@ -32,6 +32,7 @@ frappe.query_reports["Document Receivable"] = {
     },
 
     onload: function (report) {
+        // for adjust width of serial no
         const style = document.createElement('style');
         style.textContent = `
             .dt-scrollable .dt-cell__content:first-child,
@@ -40,6 +41,12 @@ frappe.query_reports["Document Receivable"] = {
             }
         `;
         document.head.appendChild(style);
+
+        report.page.add_inner_button("Banking Line", function () {
+            let filters = report.get_values();
+            bankingLine(filters.as_on);
+        });
+       
     },
 
     filters: [
@@ -61,3 +68,39 @@ frappe.query_reports["Document Receivable"] = {
     ]
 };
 
+
+
+function bankingLine(as_on) {
+    frappe.call({
+        method: "ssd_app.my_custom.doctype.doc_nego.doc_nego.banking_line",
+        args: {as_on },
+        callback: function (r) {
+            if (!r.message) return;
+            const htmlContent = `
+                <div id="cif-details-a4" style="
+                    width: 30cm;
+                    max-width: 100%;
+                    min-height: 5cm;
+                    padding: 0.3cm;
+                    background: white;
+                    font-size: 13px;
+                    box-shadow: 0 0 8px rgba(0,0,0,0.2);"
+                >${r.message}</div>
+            `;
+
+            const dialog = new frappe.ui.Dialog({
+                title: `Banking Line`,
+                size: 'large',
+                fields: [
+                    {
+                        fieldtype: 'HTML',
+                        fieldname: 'details_html',
+                        options: htmlContent
+                    }
+                ]
+            });
+
+            dialog.show();
+        }
+    });
+} 

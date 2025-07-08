@@ -4,8 +4,10 @@
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 from frappe.utils import getdate, add_days
+import json
+import pandas as pd
 
 
 def calculate_term_days(doc):
@@ -197,3 +199,182 @@ def get_available_inv_no(doctype, txt, searchfield, start, page_len, filters):
     LIMIT %s, %s
     """
     return frappe.db.sql(query, (f"%{txt}%", start, page_len))
+
+
+
+
+
+@frappe.whitelist()
+def banking_line(as_on):
+    query = """
+    SELECT
+        cif.name,
+        cif.inv_no,
+        com.company_code AS com,
+        bank.bank,
+        CASE 
+            WHEN cif.payment_term IN ('DA', 'DP') THEN 'DA+DP'
+            ELSE cif.payment_term
+        END AS p_term,
+        ROUND(cif.document, 0) * 1.0 AS document,
+        GREATEST(
+            IFNULL(nego.total_nego, 0) - IFNULL(ref.total_ref, 0) - IFNULL(rec.total_rec, 0),
+            0
+        ) * 1.0 AS nego
+    FROM `tabCIF Sheet` cif
+    LEFT JOIN (
+        SELECT inv_no, SUM(nego_amount) * 1.0 AS total_nego
+        FROM `tabDoc Nego`
+        WHERE nego_date <= %(as_on)s
+        GROUP BY inv_no
+    ) nego ON cif.name = nego.inv_no
+    LEFT JOIN (
+        SELECT inv_no, SUM(refund_amount) * 1.0 AS total_ref
+        FROM `tabDoc Refund`
+        WHERE refund_date <= %(as_on)s
+        GROUP BY inv_no
+    ) ref ON cif.name = ref.inv_no
+    LEFT JOIN (
+        SELECT inv_no, SUM(received) * 1.0 AS total_rec
+        FROM `tabDoc Received`
+        WHERE received_date <= %(as_on)s
+        GROUP BY inv_no
+    ) rec ON cif.name = rec.inv_no
+    LEFT JOIN `tabBank` bank ON cif.bank = bank.name
+    LEFT JOIN `tabCompany` com ON cif.shipping_company= com.name
+    WHERE cif.payment_term != 'TT'
+      AND GREATEST(
+          IFNULL(nego.total_nego, 0) - IFNULL(ref.total_ref, 0) - IFNULL(rec.total_rec, 0),
+          0
+      ) != 0
+      AND cif.inv_date <= %(as_on)s
+    ORDER BY cif.name ASC
+    """
+
+    rows = frappe.db.sql(query, {"as_on": as_on}, as_dict=True)
+    # Force to list of pure dicts
+    data = [dict(row) for row in rows]
+
+    if not data:
+        return "<p>No data found</p>"
+
+    df = pd.DataFrame(data)
+
+    # Get full list of banks across all data
+    all_banks = sorted(df['bank'].dropna().unique())
+
+    total_columns = 1 + len(all_banks) + 1
+    col_width = 100 / total_columns
+
+    html = """
+    <style>
+        .babking_line-table-container {
+            max-height: 80vh;
+            overflow: auto;
+            width: 100%;
+        }
+        table.babking_line-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13px;
+         
+        }
+        table.babking_line-table th, table.babking_line-table td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: right;
+            white-space: nowrap;
+        }
+        table.babking_line-table th {
+            background-color: #f5f5f5;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            text-align: center;
+        }
+        td#left { text-align: left; }
+   
+    }
+    </style>
+    """
+
+    # Process per company
+    com_list = df['com'].dropna().unique()
+    for com in com_list:
+        df_com = df[df['com'] == com]
+
+        pivot = pd.pivot_table(
+            df_com,
+            values='nego',
+            index='p_term',
+            columns='bank',
+            aggfunc='sum',
+            fill_value=0
+        )
+        # Ensure all banks appear
+        pivot = pivot.reindex(columns=all_banks, fill_value=0)
+
+        # Add row total
+        pivot['Total'] = pivot.sum(axis=1)
+
+        # Add total row
+        total_row = pd.DataFrame(pivot.sum(axis=0)).T
+        total_row.index = ['Total']
+
+        pivot = pd.concat([pivot, total_row])
+
+        pivot = pivot.round(2)
+
+        # Build HTML
+        html += f"<h3> {com}</h3>"
+        html += "<div class='babking_line-table-container'>"
+        html += "<table class='babking_line-table'>"
+        html += "<thead><tr><th id='left' style='width:{col_width:.2f}%;'>Payment Term</th>"
+        for bank in all_banks:
+            html += f"<th>{bank}</th>"
+        html += "<th >Total</th></tr></thead>"
+        html += "<tbody>"
+
+        for idx, row in pivot.iterrows():
+            html += f"<tr><td id='left'>{idx}</td>"
+            for bank in all_banks:
+                html += f"<td>{'{:,.2f}'.format(row[bank])}</td>"
+            html += f"<td>{'{:,.2f}'.format(row['Total'])}</td></tr>"
+
+        html += "</tbody></table></div>"
+
+    # Grand total table
+    grand_pivot = pd.pivot_table(
+        df,
+        values='nego',
+        index='p_term',
+        columns='bank',
+        aggfunc='sum',
+        fill_value=0
+    )
+    grand_pivot = grand_pivot.reindex(columns=all_banks, fill_value=0)
+    grand_pivot['Total'] = grand_pivot.sum(axis=1)
+    total_row = pd.DataFrame(grand_pivot.sum(axis=0)).T
+    total_row.index = ['Total']
+    grand_pivot = pd.concat([grand_pivot, total_row])
+    grand_pivot = grand_pivot.round(2)
+
+    # Build grand total HTML
+    html += f"<h3>All Companies</h3>"
+    html += "<div class='babking_line-table-container'>"
+    html += "<table class='babking_line-table'>"
+    html += "<thead><tr><th id='left'>Payment Term</th>"
+    for bank in all_banks:
+        html += f"<th>{bank}</th>"
+    html += "<th>Total</th></tr></thead>"
+    html += "<tbody>"
+
+    for idx, row in grand_pivot.iterrows():
+        html += f"<tr><td id='left'>{idx}</td>"
+        for bank in all_banks:
+            html += f"<td>{'{:,.2f}'.format(row[bank])}</td>"
+        html += f"<td>{'{:,.2f}'.format(row['Total'])}</td></tr>"
+
+    html += "</tbody></table></div>"
+
+    return html
