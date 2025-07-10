@@ -277,7 +277,6 @@ def banking_line(as_on):
             border-collapse: collapse;
             width: 100%;
             font-size: 13px;
-         
         }
         table.babking_line-table th, table.babking_line-table td {
             border: 1px solid #ddd;
@@ -293,64 +292,52 @@ def banking_line(as_on):
             text-align: center;
         }
         td#left { text-align: left; }
-   
-    }
+        .total-column { font-weight: bold; }
+        .total-row td { font-weight: bold; }
     </style>
     """
+
+    col_width = 15  # percent for Payment Term column
+    num_numeric_cols = len(all_banks) + 1  # +1 for Total column
+    numeric_col_width = (100 - col_width) / num_numeric_cols
 
     # Process per company
     com_list = df['com'].dropna().unique()
     for com in com_list:
         df_com = df[df['com'] == com]
-
         pivot = pd.pivot_table(
-            df_com,
-            values='nego',
-            index='p_term',
-            columns='bank',
-            aggfunc='sum',
-            fill_value=0
+            df_com, values='nego', index='p_term', columns='bank',
+            aggfunc='sum', fill_value=0
         )
-        # Ensure all banks appear
         pivot = pivot.reindex(columns=all_banks, fill_value=0)
-
-        # Add row total
         pivot['Total'] = pivot.sum(axis=1)
-
-        # Add total row
         total_row = pd.DataFrame(pivot.sum(axis=0)).T
         total_row.index = ['Total']
-
         pivot = pd.concat([pivot, total_row])
-
         pivot = pivot.round(2)
 
-        # Build HTML
-        html += f"<h3> {com}</h3>"
+        html += f"<h3>{com}</h3>"
         html += "<div class='babking_line-table-container'>"
         html += "<table class='babking_line-table'>"
-        html += "<thead><tr><th id='left' style='width:{col_width:.2f}%;'>Payment Term</th>"
+        html += "<thead><tr>"
+        html += f"<th id='left' style='width:{col_width:.2f}%;'>Payment Term</th>"
         for bank in all_banks:
-            html += f"<th>{bank}</th>"
-        html += "<th >Total</th></tr></thead>"
+            html += f"<th style='width:{numeric_col_width:.2f}%;'>{bank}</th>"
+        html += f"<th style='width:{numeric_col_width:.2f}%;'>Total</th></tr></thead>"
         html += "<tbody>"
 
         for idx, row in pivot.iterrows():
-            html += f"<tr><td id='left'>{idx}</td>"
+            total_row_class = "total-row" if idx == 'Total' else ""
+            html += f"<tr class='{total_row_class}'><td id='left'>{idx}</td>"
             for bank in all_banks:
                 html += f"<td>{'{:,.2f}'.format(row[bank])}</td>"
-            html += f"<td>{'{:,.2f}'.format(row['Total'])}</td></tr>"
-
+            html += f"<td class='total-column'>{'{:,.2f}'.format(row['Total'])}</td></tr>"
         html += "</tbody></table></div>"
 
-    # Grand total table
+    # Grand total
     grand_pivot = pd.pivot_table(
-        df,
-        values='nego',
-        index='p_term',
-        columns='bank',
-        aggfunc='sum',
-        fill_value=0
+        df, values='nego', index='p_term', columns='bank',
+        aggfunc='sum', fill_value=0
     )
     grand_pivot = grand_pivot.reindex(columns=all_banks, fill_value=0)
     grand_pivot['Total'] = grand_pivot.sum(axis=1)
@@ -359,21 +346,22 @@ def banking_line(as_on):
     grand_pivot = pd.concat([grand_pivot, total_row])
     grand_pivot = grand_pivot.round(2)
 
-    # Build grand total HTML
-    html += f"<h3>All Companies</h3>"
+    html += "<h3>All Companies</h3>"
     html += "<div class='babking_line-table-container'>"
     html += "<table class='babking_line-table'>"
-    html += "<thead><tr><th id='left'>Payment Term</th>"
+    html += "<thead><tr>"
+    html += f"<th id='left' style='width:{col_width:.2f}%;'>Payment Term</th>"
     for bank in all_banks:
-        html += f"<th>{bank}</th>"
-    html += "<th>Total</th></tr></thead>"
+        html += f"<th style='width:{numeric_col_width:.2f}%;'>{bank}</th>"
+    html += f"<th style='width:{numeric_col_width:.2f}%;'>Total</th></tr></thead>"
     html += "<tbody>"
 
     for idx, row in grand_pivot.iterrows():
-        html += f"<tr><td id='left'>{idx}</td>"
+        total_row_class = "total-row" if idx == 'Total' else ""
+        html += f"<tr class='{total_row_class}'><td id='left'>{idx}</td>"
         for bank in all_banks:
             html += f"<td>{'{:,.2f}'.format(row[bank])}</td>"
-        html += f"<td>{'{:,.2f}'.format(row['Total'])}</td></tr>"
+        html += f"<td class='total-column'>{'{:,.2f}'.format(row['Total'])}</td></tr>"
 
     html += "</tbody></table></div>"
 

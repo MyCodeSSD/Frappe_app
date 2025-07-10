@@ -165,7 +165,7 @@ def get_doc_flow(inv_name):
 
 	# Build buttons
  
-	due_date_str = (date.today() + timedelta(days=doc.term_days + 90)).strftime("%Y-%m-%d")
+	due_date_str = (date.today() + timedelta(days=doc.term_days)).strftime("%Y-%m-%d")
 	buttons_html = ""
 	if coll > 0:
 		buttons_html += f"""
